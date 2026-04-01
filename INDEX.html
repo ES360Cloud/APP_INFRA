@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>eSoluciones 360 - Registro de Infraestructura</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Roboto:wght@400;500&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cyan: #00B4D8;
+      --cyan-dark: #0096B4;
+      --cyan-light: #E1F5FB;
+      --green: #5CB85C;
+      --black: #1a1a1a;
+      --gray: #f5f5f5;
+      --gray2: #e0e0e0;
+      --text: #2d2d2d;
+      --text2: #666;
+      --white: #fff;
+    }
+    body { font-family: 'Roboto', sans-serif; color: var(--text); background: #f0f4f8; }
+    .app { max-width: 700px; margin: 0 auto; background: var(--white); min-height: 100vh; position: relative; }
+    .header { background: #111; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+    .logo-wrap { width: 52px; height: 52px; flex-shrink: 0; }
+    .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .header-text h1 { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; }
+    .header-text p { font-size: 11px; color: #aaa; margin-top: 1px; }
+    .progress-bar { height: 3px; background: var(--gray2); }
+    .progress-fill { height: 100%; background: var(--cyan); transition: width 0.4s ease; }
+    .screen { display: none; padding: 24px 20px; animation: fadeIn 0.25s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .screen-title { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; color: var(--black); margin-bottom: 6px; }
+    .screen-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+    .infra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .infra-card { border: 2px solid var(--gray2); border-radius: 12px; padding: 18px 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); }
+    .infra-card:hover { border-color: var(--cyan); background: var(--cyan-light); }
+    .infra-card.selected { border-color: var(--cyan); background: var(--cyan-light); }
+    .infra-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+    .infra-label { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; display: block; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 14px; font-family: 'Roboto', sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--cyan); }
+    select.form-input { background: var(--white); cursor: pointer; }
+    .btn { padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: var(--cyan); color: var(--white); }
+    .btn-primary:hover { background: var(--cyan-dark); }
+    .btn-secondary { background: var(--gray); color: var(--text); border: 1.5px solid var(--gray2); }
+    .btn-secondary:hover { background: var(--gray2); }
+    .btn-danger { background: #fee; color: #c00; border: 1.5px solid #fcc; font-size: 12px; padding: 6px 12px; }
+    .btn-green { background: var(--green); color: var(--white); }
+    .btn-green:hover { background: #4a9e4a; }
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    .photo-section { margin-bottom: 12px; }
+    .photo-add-panel { border: 1.5px dashed var(--gray2); border-radius: 10px; padding: 16px; background: var(--gray); }
+    .photo-add-panel .form-group { margin-bottom: 10px; }
+    .photo-add-panel .form-group:last-child { margin-bottom: 0; }
+    .photos-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .photo-item { display: flex; align-items: center; gap: 10px; background: var(--cyan-light); border: 1px solid var(--cyan); border-radius: 8px; padding: 8px 12px; }
+    .photo-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--cyan); }
+    .photo-info { flex: 1; min-width: 0; }
+    .photo-name { font-weight: 600; font-size: 13px; color: var(--cyan-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .photo-file { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .summary-section { border: 1px solid var(--gray2); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+    .summary-header { background: var(--cyan); color: var(--white); padding: 10px 14px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .summary-body { padding: 12px 14px; }
+    .summary-photo-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--gray2); }
+    .summary-photo-row:last-child { border-bottom: none; }
+    .summary-thumb { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid var(--gray2); }
+    .summary-photo-name { font-size: 12px; font-weight: 500; color: var(--text); }
+    .summary-photo-file { font-size: 11px; color: var(--text2); }
+    .infra-badge { display: inline-block; background: var(--cyan); color: var(--white); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; margin-bottom: 8px; font-family: 'Nunito', sans-serif; }
+    .empty-state { text-align: center; padding: 30px 20px; color: var(--text2); font-size: 13px; }
+    .empty-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+    .file-input-label { display: flex; justify-content: center; align-items: center; gap: 8px; border: 1.5px solid var(--gray2); border-radius: 8px; padding: 9px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); background: var(--white); transition: border-color 0.2s; flex: 1; text-align: center; }
+    .file-input-label:hover { border-color: var(--cyan); color: var(--cyan); }
+    input[type=file] { display: none; }
+    .add-more-btn { width: 100%; padding: 9px; border: 1.5px dashed var(--cyan); border-radius: 8px; background: transparent; color: var(--cyan); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+    .add-more-btn:hover { background: var(--cyan-light); }
+    .section-divider { border: none; border-top: 1px solid var(--gray2); margin: 20px 0; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; background: #111; color: var(--cyan); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; font-family: 'Nunito', sans-serif; }
+    #addPhotoForm .btn-row { margin-top: 12px; }
+    .notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-family: 'Nunito',sans-serif; font-weight: 600; z-index: 999; display: none; animation: fadeIn 0.2s; }
+    .file-status { font-size: 12px; color: var(--text2); margin-top: 8px; text-align: center; background: #fff; padding: 6px; border-radius: 6px; border: 1px solid var(--gray2); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="logo-wrap">
+      <img src="./esoluciones360.png" alt="eSoluciones360" id="logoImg" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';"/>
+      <svg id="logoFallback" style="display:none;width:52px;height:52px;" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#00B4D8" opacity="0.2" stroke="#00B4D8" stroke-width="2"/><text x="50" y="56" text-anchor="middle" font-size="18" font-weight="bold" fill="#00B4D8" font-family="sans-serif">360</text></svg>
+    </div>
+    <div class="header-text">
+      <h1>eSoluciones 360</h1>
+      <p>Registro de Infraestructura de Red</p>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+
+  <div class="screen active" id="screen1">
+    <div class="screen-title">Tipo de infraestructura</div>
+    <div class="screen-sub">Seleccione el tipo de infraestructura que desea registrar</div>
+    <div class="infra-grid">
+      <div class="infra-card" onclick="selectInfra('ARQUETA')" id="card_ARQUETA">
+        <span class="infra-icon">🏗️</span>
+        <div class="infra-label">ARQUETA</div>
+      </div>
+      <div class="infra-card" onclick="selectInfra('CR')" id="card_CR">
+        <span class="infra-icon">📦</span>
+        <div class="infra-label">CR</div>
+      </div>
+      <div class="infra-card" onclick="selectInfra('POSTES')" id="card_POSTES">
+        <span class="infra-icon">🔌</span>
+        <div class="infra-label">POSTES</div>
+      </div>
+      <div class="infra-card" onclick="selectInfra('SALIDAS LATERALES')" id="card_SALIDAS">
+        <span class="infra-icon">↔️</span>
+        <div class="infra-label">SALIDAS LATERALES</div>
+      </div>
+      <div class="infra-card" onclick="selectInfra('PASOS AÉREOS')" id="card_PASOS" style="grid-column:1/-1;">
+        <span class="infra-icon">🌉</span>
+        <div class="infra-label">PASOS AÉREOS</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="goStep2()" id="btnStep1" disabled>Continuar →</button></div>
+  </div>
+
+  <div class="screen" id="screen2">
+    <span class="infra-badge" id="infraBadge">ARQUETA</span>
+    <div class="screen-title" id="screen2Title">Datos de la Arqueta</div>
+    <div class="screen-sub">Complete los datos y añada las fotos necesarias</div>
+    
+    <div class="form-group">
+      <label class="form-label" id="nameLabel">Nombre de la Arqueta</label>
+      <input class="form-input" id="infraName" type="text" placeholder="Ingrese el nombre..." />
+    </div>
+
+    <hr class="section-divider">
+    <div style="font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--black);margin-bottom:12px;">Fotos</div>
+    
+    <div class="photos-list" id="photosList"></div>
+    
+    <div class="photo-add-panel" id="addPhotoForm">
+      <div class="form-group">
+        <label class="form-label">Nombre de la foto</label>
+        <select class="form-input" id="photoNameSelect" onchange="handlePhotoNameChange()"></select>
+      </div>
+      <div class="form-group" id="otroGroup" style="display:none;">
+        <label class="form-label">Nombre personalizado</label>
+        <input class="form-input" id="otroInput" type="text" placeholder="Ingrese el nombre de la foto..."/>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Archivo de imagen</label>
+        <div style="display: flex; gap: 10px;">
+          <label class="file-input-label" for="photoFileCamera">
+            📷 Tomar Foto
+          </label>
+          <input type="file" id="photoFileCamera" accept="image/*" capture="environment" onchange="updateFileLabel(this)"/>
+          
+          <label class="file-input-label" for="photoFileGallery">
+            🖼️ Galería
+          </label>
+          <input type="file" id="photoFileGallery" accept="image/*" onchange="updateFileLabel(this)"/>
+        </div>
+        <div class="file-status" id="fileLabel">Ninguna imagen seleccionada</div>
+      </div>
+
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-primary" onclick="addPhoto()" style="width: 100%;">+ Añadir foto al registro</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goScreen(1)">← Atrás</button>
+      <button class="btn btn-primary" onclick="goScreen(3)">Ver resumen →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen3">
+    <div class="screen-title">Resumen del registro</div>
+    <div class="screen-sub">Revise las infraestructuras añadidas y genere el PDF o descargue las fotos</div>
+    <div id="summaryContainer"></div>
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <span class="empty-icon">📭</span>
+      No hay registros añadidos todavía.
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goScreen(1)">← Añadir más</button>
+      <button class="btn btn-primary" onclick="generatePDF()">📄 Generar PDF</button>
+      <button class="btn btn-green" onclick="downloadPhotos()">⬇ Descargar fotos</button>
+    </div>
+  </div>
+</div>
+<div class="notification" id="notification"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const PHOTO_OPTIONS = {
+  'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORÁMICA','CROQUIS IZQUIERDO','CROQUIS DERECHO','OTRO'],
+  'CR': ['TAPA CERRADA','RECORRIDO DEL CABLE','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORÁMICA','CROQUIS IZQUIERDO','CROQUIS DERECHO','CR','OTRO'],
+  'POSTES': ['PANORÁMICA','FERRETERÍA','CROQUIS IZQUIERDO','CROQUIS DERECHO','OTRO'],
+  'SALIDAS LATERALES': ['PANORÁMICA','ETIQUETA','CROQUIS IZQUIERDA','CROQUIS DERECHA','OTRO'],
+  'PASOS AÉREOS': ['PINZA 1','PINZA 2','PANORÁMICA','OTRO']
+};
+const NAME_LABELS = {
+  'ARQUETA':'Nombre de la Arqueta','CR':'Nombre del CR','POSTES':'Nombre del Poste','SALIDAS LATERALES':'Nombre de la Salida Lateral','PASOS AÉREOS':'Nombre del Paso Aéreo'
+};
+
+let selectedInfra = null;
+let currentPhotos = [];
+let allRecords = [];
+let selectedFileInput = null; // Guarda cuál input (cámara o galería) tiene el archivo
+
+function selectInfra(type) {
+  selectedInfra = type;
+  document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected'));
+  const key = type === 'SALIDAS LATERALES' ? 'SALIDAS' : type === 'PASOS AÉREOS' ? 'PASOS' : type;
+  const el = document.getElementById('card_' + key);
+  if (el) el.classList.add('selected');
+  document.getElementById('btnStep1').disabled = false;
+}
+
+function goStep2() {
+  if (!selectedInfra) return;
+  currentPhotos = [];
+  document.getElementById('infraName').value = '';
+  document.getElementById('infraBadge').textContent = selectedInfra;
+  document.getElementById('screen2Title').textContent = 'Datos: ' + selectedInfra;
+  document.getElementById('nameLabel').textContent = NAME_LABELS[selectedInfra];
+  populatePhotoSelect();
+  renderPhotosList();
+  goScreen(2);
+}
+
+function populatePhotoSelect() {
+  const sel = document.getElementById('photoNameSelect');
+  sel.innerHTML = '';
+  (PHOTO_OPTIONS[selectedInfra] || []).forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt; o.textContent = opt; sel.appendChild(o);
+  });
+  handlePhotoNameChange();
+}
+
+function handlePhotoNameChange() {
+  const v = document.getElementById('photoNameSelect').value;
+  document.getElementById('otroGroup').style.display = v === 'OTRO' ? 'block' : 'none';
+}
+
+function updateFileLabel(inputElement) {
+  selectedFileInput = inputElement;
+  
+  // Limpiar el otro input para evitar confusiones
+  if (inputElement.id === 'photoFileCamera') {
+    document.getElementById('photoFileGallery').value = '';
+  } else {
+    document.getElementById('photoFileCamera').value = '';
+  }
+
+  const f = inputElement.files[0];
+  document.getElementById('fileLabel').textContent = f ? '✅ Lista para añadir: ' + f.name : 'Ninguna imagen seleccionada';
+}
+
+function addPhoto() {
+  const nameVal = document.getElementById('photoNameSelect').value;
+  const finalName = nameVal === 'OTRO' ? (document.getElementById('otroInput').value.trim() || 'OTRO') : nameVal;
+  
+  const file = selectedFileInput ? selectedFileInput.files[0] : null;
+  
+  if (!file) { showNotification('⚠ Seleccione o tome una imagen primero'); return; }
+  
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentPhotos.push({ name: finalName, file: file, dataUrl: e.target.result });
+    renderPhotosList();
+    
+    // Resetear inputs y etiquetas
+    if(selectedFileInput) selectedFileInput.value = '';
+    selectedFileInput = null;
+    document.getElementById('fileLabel').textContent = 'Ninguna imagen seleccionada';
+    document.getElementById('otroInput').value = '';
+    populatePhotoSelect();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(i) { currentPhotos.splice(i, 1); renderPhotosList(); }
+
+function renderPhotosList() {
+  const list = document.getElementById('photosList');
+  list.innerHTML = '';
+  currentPhotos.forEach((p, i) => {
+    list.innerHTML += `<div class="photo-item">
+      <img class="photo-thumb" src="${p.dataUrl}" alt="${p.name}"/>
+      <div class="photo-info">
+        <div class="photo-name">${p.name}</div>
+        <div class="photo-file">${p.file.name}</div>
+      </div>
+      <button class="btn btn-danger" onclick="removePhoto(${i})">✕</button>
+    </div>`;
+  });
+}
+
+function goScreen(n) {
+  if (n === 3) {
+    const name = document.getElementById('infraName').value.trim();
+    if (name && currentPhotos.length > 0) {
+      const existing = allRecords.findIndex(r => r.type === selectedInfra && r.name === name);
+      if (existing >= 0) allRecords[existing].photos = [...currentPhotos];
+      else allRecords.push({ type: selectedInfra, name, photos: [...currentPhotos] });
+    }
+    renderSummary();
+    document.getElementById('progressFill').style.width = '100%';
+  } else if (n === 2) {
+    document.getElementById('progressFill').style.width = '66%';
+  } else {
+    document.getElementById('progressFill').style.width = '33%';
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen' + n).classList.add('active');
+}
+
+function deleteRecord(i) { allRecords.splice(i, 1); renderSummary(); }
+
+function renderSummary() {
+  const cont = document.getElementById('summaryContainer');
+  const empty = document.getElementById('emptyState');
+  if (!allRecords.length) { cont.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  cont.innerHTML = allRecords.map((r, i) => `
+    <div class="summary-section">
+      <div class="summary-header">
+        <span>${r.type}: ${r.name}</span>
+        <button class="btn btn-danger" onclick="deleteRecord(${i})" style="padding:3px 8px;font-size:11px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);">✕</button>
+      </div>
+      <div class="summary-body">
+        ${r.photos.map(p => `<div class="summary-photo-row">
+          <img class="summary-thumb" src="${p.dataUrl}" alt="${p.name}"/>
+          <div>
+            <div class="summary-photo-name">${p.name}</div>
+            <div class="summary-photo-file">${p.file.name}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+async function generatePDF() {
+  if (!allRecords.length) { showNotification('⚠ No hay registros'); return; }
+  showNotification('⏳ Generando PDF...');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const pw = 210, margin = 14;
+  let y = 0;
+
+  // Logo header
+  try {
+    const logoImg = document.getElementById('logoImg');
+    if (logoImg && logoImg.complete && logoImg.naturalWidth) {
+      const canvas = document.createElement('canvas');
+      canvas.width = logoImg.naturalWidth; canvas.height = logoImg.naturalHeight;
+      canvas.getContext('2d').drawImage(logoImg, 0, 0);
+      doc.addImage(canvas.toDataURL('image/png'), 'PNG', margin, 8, 18, 18);
+    }
+  } catch(e) {}
+
+  doc.setFillColor(17, 17, 17);
+  doc.rect(0, 0, pw, 30, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14); doc.setTextColor(0, 180, 216);
+  doc.text('eSoluciones 360', 36, 14);
+  doc.setFontSize(9); doc.setTextColor(170, 170, 170);
+  doc.text('Registro de Infraestructura de Red', 36, 21);
+  doc.setFontSize(8); doc.setTextColor(120, 120, 120);
+  doc.text('Fecha: ' + new Date().toLocaleDateString('es-ES'), 36, 27);
+  y = 38;
+
+  for (const rec of allRecords) {
+    if (y > 240) { doc.addPage(); y = 15; }
+    doc.setFillColor(0, 180, 216);
+    doc.rect(margin, y, pw - margin*2, 9, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(255, 255, 255);
+    doc.text(`${rec.type}: ${rec.name}`, margin + 3, y + 6.5);
+    y += 12;
+
+    const cols = 2, imgW = (pw - margin*2 - 8) / cols, imgH = imgW * 0.7;
+    let col = 0;
+    for (const photo of rec.photos) {
+      if (col === 0 && y + imgH + 14 > 280) { doc.addPage(); y = 15; }
+      const x = margin + col * (imgW + 8);
+      try {
+        doc.addImage(photo.dataUrl, 'JPEG', x, y, imgW, imgH);
+      } catch(e) {
+        doc.setFillColor(240,240,240); doc.rect(x, y, imgW, imgH, 'F');
+      }
+      doc.setFillColor(30, 30, 30); doc.rect(x, y + imgH, imgW, 7, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(0, 200, 230);
+      doc.text(photo.name, x + 2, y + imgH + 5);
+      col++;
+      if (col >= cols) { col = 0; y += imgH + 9; }
+    }
+    if (col > 0) y += imgH + 9;
+    y += 6;
+  }
+
+  doc.save('eSoluciones360_Infraestructura.pdf');
+  showNotification('✅ PDF generado correctamente');
+}
+
+async function downloadPhotos() {
+  if (!allRecords.length) { showNotification('⚠ No hay registros'); return; }
+  showNotification('⏳ Preparando descarga...');
+  const zip = new JSZip();
+  for (const rec of allRecords) {
+    const folderName = rec.type.replace(/\s/g,'_') + '_' + rec.name.replace(/\s/g,'_');
+    const folder = zip.folder(folderName);
+    for (const photo of rec.photos) {
+      const ext = photo.file.name.split('.').pop() || 'jpg';
+      const fname = photo.name.replace(/\s/g,'_') + '.' + ext;
+      const b64 = photo.dataUrl.split(',')[1];
+      folder.file(fname, b64, { base64: true });
+    }
+  }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'eSoluciones360_Fotos.zip'; a.click();
+  URL.revokeObjectURL(url);
+  showNotification('✅ Fotos descargadas en ZIP');
+}
+
+function showNotification(msg) {
+  const n = document.getElementById('notification');
+  n.textContent = msg; n.style.display = 'block';
+  clearTimeout(n._t); n._t = setTimeout(() => n.style.display = 'none', 2800);
+}
+
+// Load logo as base64 for PDF
+const logoImg = document.getElementById('logoImg');
+logoImg.addEventListener('error', () => { logoImg.style.display='none'; document.getElementById('logoFallback').style.display='block'; });
+</script>
+
+</body>
+</html>
