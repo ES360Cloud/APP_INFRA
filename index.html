@@ -165,12 +165,17 @@
         <input type="file" id="gal" accept="image/*" onchange="addPhoto(this)"/>
       </div>
     </div>
+    
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="cancelEditOrGoBack()">← Atras</button>
-      <button class="btn btn-green" id="btnSaveAdd" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro elemento</button>
+      <button class="btn btn-secondary" onclick="goPreviousElement()">← Atras</button>
+      <button class="btn btn-green" id="btnSaveAdd" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro</button>
       <button class="btn btn-primary" id="btnSaveSummary" onclick="saveAndGoSummary()">Ver resumen →</button>
       <button class="btn btn-blue" id="btnUpdateEdit" onclick="updateEdit()" style="display:none; flex: 2; width: 100%;">💾 Guardar Edicion</button>
     </div>
+    <div class="btn-row" style="margin-top: 10px;">
+      <button class="btn btn-secondary" onclick="goToInfraSelection()" style="width: 100%;">📋 Volver a seleccion de infraestructura</button>
+    </div>
+
   </div>
 
   <div class="screen" id="screen3">
@@ -197,6 +202,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
+// URL SCRIPT ACTUALIZADA
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWWTo2zP8hUjJDIMwyRgpSr3qZwXufwIZ6VQpo8ReepDI4EEPDHalgrvdcCzu9uve5/exec";
 
 const PHOTO_OPTIONS = {
@@ -224,7 +230,7 @@ let allRecords = [];
 let currentLat = "SIN COORDENADAS";
 let currentLng = "SIN COORDENADAS";
 
-let editingRecordIndex = -1; // Nueva variable para controlar la edicion
+let editingRecordIndex = -1;
 
 document.addEventListener("DOMContentLoaded", () => {
   const savedContractor = localStorage.getItem("esoluciones_contractor");
@@ -415,13 +421,45 @@ function goBackToScreen2() {
   goScreen(2);
 }
 
-function cancelEditOrGoBack() {
+// LOGICA: Volver a seleccion de infraestructura
+function goToInfraSelection() {
+  editingRecordIndex = -1;
+  resetScreen2Buttons();
+  goScreen(1);
+}
+
+// LOGICA: Navegar al elemento anterior de la misma infra
+function goPreviousElement() {
+  const sameTypeRecords = allRecords.filter(r => r.type === selectedInfra);
+  
+  if (sameTypeRecords.length === 0) {
+     showNotification("No hay elementos anteriores de este tipo.");
+     return;
+  }
+
+  let targetRecord = null;
+  let targetIndexInAll = -1;
+
   if (editingRecordIndex !== -1) {
-    editingRecordIndex = -1;
-    resetScreen2Buttons();
-    goScreen(3);
+    // Si ya estabamos editando uno, buscamos el que esta antes de este
+    const rec = allRecords[editingRecordIndex];
+    const currentIndex = sameTypeRecords.findIndex(r => r === rec);
+    if (currentIndex > 0) {
+      targetRecord = sameTypeRecords[currentIndex - 1];
+    } else {
+      showNotification("Este es el primer elemento. No hay anterior.");
+      return;
+    }
   } else {
-    goScreen(1);
+    // Si estamos en uno nuevo, el anterior es el ultimo que se guardo
+    targetRecord = sameTypeRecords[sameTypeRecords.length - 1];
+  }
+
+  if (targetRecord) {
+    targetIndexInAll = allRecords.indexOf(targetRecord);
+    if (targetIndexInAll !== -1) {
+      editRecord(targetIndexInAll);
+    }
   }
 }
 
@@ -583,9 +621,10 @@ function saveAndAddAnother() {
   });
 }
 
+// LOGICA: Permite ir al resumen sin forzar guardado si no hay fotos
 function saveAndGoSummary() {
-  const name = document.getElementById('infraName').value.trim();
-  if (name || currentPhotos.length > 0) {
+  if (currentPhotos.length > 0) {
+    // Si cargaron fotos en el elemento actual, lo validamos y guardamos normal
     if (!validateCurrentRecord()) return; 
     const rec = createRecordObject();
     saveRecordToDB(rec, (savedRec) => {
@@ -596,6 +635,7 @@ function saveAndGoSummary() {
       goScreen(3);
     });
   } else {
+    // Si no hay fotos, simplemente descartamos este elemento vacio y vamos al resumen
     currentPhotos = [];
     document.getElementById('infraName').value = '';
     renderSummary();
