@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>eSoluciones 360 - Registro de Infraestructura</title>
+  <link rel="icon" href="./esoluciones360.png" type="image/png">
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Roboto:wght@400;500&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,6 +70,11 @@
     .sync-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; color: white; font-family: 'Nunito', sans-serif; text-align: center; }
     .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-top-color: var(--cyan); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .gps-status { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 4px; margin-bottom: 10px;}
+    .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+    .gps-dot.active { background: var(--green); }
+    .gps-dot.error { background: #c00; }
   </style>
 </head>
 <body>
@@ -91,7 +98,7 @@
     
     <div class="form-group">
       <label class="form-label">Nombre de Contrata / Empresa</label>
-      <input class="form-input" id="contractorInput" type="text" placeholder="Ej: EMPRESA CONTRATISTA 1" style="text-transform: uppercase;" />
+      <input class="form-input" id="contractorInput" type="text" placeholder="Ej: JAIRO" style="text-transform: uppercase;" />
     </div>
 
     <div class="form-group">
@@ -127,6 +134,12 @@
 
   <div class="screen" id="screen2">
     <div class="screen-title" id="screen2Title">Datos</div>
+    
+    <div class="gps-status" id="gpsStatus">
+      <div class="gps-dot" id="gpsDot"></div>
+      <span id="gpsText">Buscando ubicación GPS...</span>
+    </div>
+
     <div class="form-group">
       <label class="form-label" id="nameLabel">Nombre del elemento</label>
       <input class="form-input" id="infraName" type="text" placeholder="Ej: P-01..." />
@@ -161,7 +174,7 @@
       <button class="btn btn-secondary" onclick="goBackToScreen2()">← Añadir más fotos</button>
       <button class="btn btn-blue" onclick="syncWithDrive()" style="width:100%; font-size: 16px; padding: 14px;">☁️ Sincronizar con Drive</button>
       <button class="btn btn-primary" onclick="generatePDF()">📄 PDF</button>
-      <button class="btn btn-green" onclick="downloadPhotos()">⬇ ZIP Fotos</button>
+      <button class="btn btn-green" onclick="downloadPhotos()">⬇ ZIP Fotos y Mapa</button>
       <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:20px;">🗑️ Borrar todo localmente (Nueva Inspección)</button>
     </div>
   </div>
@@ -178,6 +191,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
+// ==========================================
+// ¡PEGA AQUÍ LA URL DE GOOGLE SCRIPT!
+// ==========================================
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2EHHA5kfzrV2kCpjsHycyeTz3CjWF6jNuvP48BJYRjRUGWtmmwRoM4rxxwY6bSFX4/exec";
 
 const PHOTO_OPTIONS = {
@@ -194,7 +210,9 @@ let selectedInfra = null;
 let currentPhotos = [];
 let allRecords = [];
 
-// Autocompletar contrata si se guardó antes
+let currentLat = "SIN COORDENADAS";
+let currentLng = "SIN COORDENADAS";
+
 document.addEventListener("DOMContentLoaded", () => {
   const savedContractor = localStorage.getItem("esoluciones_contractor");
   if (savedContractor) {
@@ -202,9 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Base de Datos Offline (IndexedDB)
 let db;
-const request = indexedDB.open("InfraDB", 2); 
+const request = indexedDB.open("InfraDB", 3); 
 
 request.onupgradeneeded = function(e) {
   db = e.target.result;
@@ -277,11 +294,9 @@ function startProject() {
   if(!contractor) { showNotification("⚠ Introduce la empresa/contrata"); return; }
   if(!name) { showNotification("⚠ Introduce un nombre de proyecto"); return; }
 
-  // Guardar contratista en el móvil para la próxima vez
   localStorage.setItem("esoluciones_contractor", contractor);
   currentContractor = contractor;
 
-  // Verifica si el nombre ya tiene el formato YYYY-MM-DD al principio
   if (!name.match(/^\d{4}-\d{2}-\d{2} - /)) {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -306,12 +321,45 @@ function selectInfra(type) {
   document.getElementById('btnStep1').disabled = false;
 }
 
+function requestGPS() {
+  const dot = document.getElementById('gpsDot');
+  const text = document.getElementById('gpsText');
+  
+  currentLat = "SIN COORDENADAS";
+  currentLng = "SIN COORDENADAS";
+  
+  dot.className = 'gps-dot';
+  text.textContent = 'Buscando ubicación GPS...';
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        currentLat = position.coords.latitude.toFixed(6);
+        currentLng = position.coords.longitude.toFixed(6);
+        dot.className = 'gps-dot active';
+        text.textContent = `GPS Activo (${currentLat}, ${currentLng})`;
+      },
+      (error) => {
+        dot.className = 'gps-dot error';
+        text.textContent = 'GPS no disponible (Se guardará sin coordenadas)';
+        alert("⚠️ GPS inactivo o permiso denegado. Recuerda activar la ubicación para el registro. El elemento se guardará sin coordenadas.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  } else {
+    dot.className = 'gps-dot error';
+    text.textContent = 'Tu navegador no soporta GPS';
+    alert("⚠️ Tu navegador no soporta GPS. El elemento se guardará sin coordenadas.");
+  }
+}
+
 function goStep2() {
   currentPhotos = [];
   document.getElementById('infraName').value = '';
   document.getElementById('screen2Title').textContent = selectedInfra;
   populateOptions();
   renderPhotos();
+  requestGPS(); 
   goScreen(2);
 }
 
@@ -323,6 +371,7 @@ function goBackToScreen2() {
   currentPhotos = [];
   document.getElementById('infraName').value = '';
   renderPhotos();
+  requestGPS(); 
   goScreen(2);
 }
 
@@ -374,6 +423,8 @@ function saveCurrentRecord() {
     projectName: currentProjectName, 
     type: selectedInfra, 
     name: name, 
+    lat: currentLat,
+    lng: currentLng,
     photos: [...currentPhotos] 
   };
   saveRecordToDB(record);
@@ -385,6 +436,7 @@ function saveAndAddAnother() {
     currentPhotos = [];
     document.getElementById('infraName').value = '';
     renderPhotos();
+    requestGPS(); 
     showNotification('✅ Guardado en memoria. Puede cargar el siguiente.');
     window.scrollTo(0, 0);
   }
@@ -412,6 +464,7 @@ function renderSummary() {
     <div class="summary-section">
       <div class="summary-header"><span>${r.type}: ${r.name}</span>
       <button class="btn-danger" style="padding:2px 6px" onclick="deleteRecordFromDB(${i})">✕</button></div>
+      <div style="padding: 5px 14px; font-size: 11px; color: var(--text2); background: var(--gray);">GPS: ${r.lat}, ${r.lng}</div>
       <div class="summary-body">${r.photos.map(p => `<div class="summary-photo-row"><img class="summary-thumb" src="${p.dataUrl}"><span>${p.name}</span></div>`).join('')}</div>
     </div>`).join('');
 }
@@ -520,7 +573,8 @@ async function generatePDF() {
 
   allRecords.forEach(r => {
     doc.setFontSize(14); doc.text(`${r.contractorName} | ${r.projectName} | ${r.type}: ${r.name}`, 15, y);
-    y += 10;
+    doc.setFontSize(9); doc.setTextColor(100); doc.text(`GPS: ${r.lat}, ${r.lng}`, 15, y + 6); doc.setTextColor(0);
+    y += 15;
     r.photos.forEach(p => {
       if (y > 250) { doc.addPage(); y = 20; }
       try {
@@ -539,12 +593,21 @@ async function downloadPhotos() {
   if (!allRecords.length) { showNotification('⚠ No hay registros'); return; }
   showNotification('⏳ Preparando ZIP...');
   const zip = new JSZip();
+  
+  let csvContent = "Elemento,Tipo,Proyecto,Contrata,Latitud,Longitud\n";
+
   allRecords.forEach(r => {
     const contractorFolder = zip.folder(r.contractorName || "Contratista");
     const projFolder = contractorFolder.folder(r.projectName || "Proyecto");
     const infraFolder = projFolder.folder(r.type + "_" + r.name);
+    
     r.photos.forEach(p => infraFolder.file(p.name + ".jpg", p.dataUrl.split(',')[1], {base64: true}));
+    
+    csvContent += `${r.name},${r.type},${r.projectName},${r.contractorName},${r.lat || 'SIN COORDENADAS'},${r.lng || 'SIN COORDENADAS'}\n`;
   });
+  
+  zip.file("coordenadas_mapa.csv", csvContent);
+
   const blob = await zip.generateAsync({type:"blob"});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "fotos_esoluciones.zip"; a.click();
   showNotification('✅ ZIP descargado');
