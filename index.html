@@ -75,6 +75,10 @@
     .gps-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
     .gps-dot.active { background: var(--green); }
     .gps-dot.error { background: #c00; }
+    
+    .sync-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 800; margin-left: 8px;}
+    .sync-badge.pending { background: #ffc107; color: #000; }
+    .sync-badge.done { background: #5CB85C; color: #fff; }
   </style>
 </head>
 <body>
@@ -93,12 +97,12 @@
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
 
   <div class="screen active" id="screen0">
-    <div class="screen-title">Inicio de Sesión y Proyecto</div>
+    <div class="screen-title">Inicio de Sesion y Proyecto</div>
     <div class="screen-sub">Identifique a su empresa y el proyecto a trabajar</div>
     
     <div class="form-group">
-      <label class="form-label">Nombre de Contratista / Equipo</label>
-      <input class="form-input" id="contractorInput" type="text" placeholder="Ej: CONTRATISTA 1" style="text-transform: uppercase;" />
+      <label class="form-label">Nombre de Contrata / Empresa</label>
+      <input class="form-input" id="contractorInput" type="text" placeholder="EMPRESA CONTRATISTA ASIGNADA" style="text-transform: uppercase;" />
     </div>
 
     <div class="form-group">
@@ -124,7 +128,7 @@
       <div class="infra-card" onclick="selectInfra('CR')" id="card_CR"><span class="infra-icon">📦</span><div class="infra-label">CR</div></div>
       <div class="infra-card" onclick="selectInfra('POSTES')" id="card_POSTES"><span class="infra-icon">🔌</span><div class="infra-label">POSTES</div></div>
       <div class="infra-card" onclick="selectInfra('SALIDAS LATERALES')" id="card_SALIDAS"><span class="infra-icon">↔️</span><div class="infra-label">SALIDAS</div></div>
-      <div class="infra-card" onclick="selectInfra('PASOS AÉREOS')" id="card_PASOS" style="grid-column:1/-1;"><span class="infra-icon">🌉</span><div class="infra-label">PASOS AÉREOS</div></div>
+      <div class="infra-card" onclick="selectInfra('PASOS AEREOS')" id="card_PASOS" style="grid-column:1/-1;"><span class="infra-icon">🌉</span><div class="infra-label">PASOS AEREOS</div></div>
     </div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goScreen(0)">← Proyecto</button>
@@ -137,7 +141,7 @@
     
     <div class="gps-status" id="gpsStatus">
       <div class="gps-dot" id="gpsDot"></div>
-      <span id="gpsText">Buscando ubicación GPS...</span>
+      <span id="gpsText">Buscando ubicacion GPS...</span>
     </div>
 
     <div class="form-group">
@@ -154,28 +158,28 @@
         <input class="form-input" id="otroInput" type="text" placeholder="Nombre personalizado..."/>
       </div>
       <div style="display: flex; gap: 10px;">
-        <label class="file-input-label" for="cam">📷 Cámara</label>
+        <label class="file-input-label" for="cam">📷 Camara</label>
         <input type="file" id="cam" accept="image/*" capture="environment" onchange="addPhoto(this)"/>
-        <label class="file-input-label" for="gal">🖼️ Galería</label>
+        <label class="file-input-label" for="gal">🖼️ Galeria</label>
         <input type="file" id="gal" accept="image/*" onchange="addPhoto(this)"/>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goScreen(1)">← Infraestructura</button>
+      <button class="btn btn-secondary" onclick="goScreen(1)">← Atras</button>
       <button class="btn btn-green" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro elemento</button>
       <button class="btn btn-primary" onclick="saveAndGoSummary()">Ver resumen →</button>
     </div>
   </div>
 
   <div class="screen" id="screen3">
-    <div class="screen-title">Resumen y Sincronización</div>
+    <div class="screen-title">Resumen y Sincronizacion</div>
     <div id="summaryContainer"></div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goBackToScreen2()">← Añadir más fotos</button>
-      <button class="btn btn-blue" onclick="syncWithDrive()" style="width:100%; font-size: 16px; padding: 14px;">☁️ Sincronizar con Drive</button>
+      <button class="btn btn-secondary" onclick="goBackToScreen2()">← Agregar mas fotos</button>
+      <button class="btn btn-blue" onclick="syncWithDrive()" style="width:100%; font-size: 16px; padding: 14px;">☁️ Sincronizar fallidos con Drive</button>
       <button class="btn btn-primary" onclick="generatePDF()">📄 PDF</button>
       <button class="btn btn-green" onclick="downloadPhotos()">⬇ ZIP Fotos y Mapa</button>
-      <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:20px;">🗑️ Borrar todo localmente (Nueva Inspección)</button>
+      <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:20px;">🗑️ Borrar todo localmente (Nueva Inspeccion)</button>
     </div>
   </div>
 </div>
@@ -184,24 +188,22 @@
 <div class="sync-overlay" id="syncOverlay">
   <div class="spinner"></div>
   <h2 id="syncText">Sincronizando...</h2>
-  <p id="syncSubtext">No cierres esta pantalla ni la aplicación.</p>
+  <p id="syncSubtext">No cierres esta pantalla ni la aplicacion.</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-// ==========================================
-// ¡PEGA AQUÍ LA URL DE GOOGLE SCRIPT!
-// ==========================================
+// URL precargada con tu Script de Google
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2EHHA5kfzrV2kCpjsHycyeTz3CjWF6jNuvP48BJYRjRUGWtmmwRoM4rxxwY6bSFX4/exec";
 
 const PHOTO_OPTIONS = {
-  'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORÁMICA','CROQUIS','OTRO'],
-  'CR': ['TAPA CERRADA','CABLEADO','PRISMA 1','PRISMA 2','ETIQUETA','PANORÁMICA','OTRO'],
-  'POSTES': ['PANORÁMICA','FERRETERÍA','CROQUIS','OTRO'],
-  'SALIDAS LATERALES': ['PANORÁMICA','ETIQUETA','CROQUIS','OTRO'],
-  'PASOS AÉREOS': ['PINZA 1','PINZA 2','PANORÁMICA','OTRO']
+  'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORAMICA','CROQUIS','OTRO'],
+  'CR': ['TAPA CERRADA','CABLEADO','PRISMA 1','PRISMA 2','ETIQUETA','PANORAMICA','OTRO'],
+  'POSTES': ['PANORAMICA','FERRETERIA','CROQUIS','OTRO'],
+  'SALIDAS LATERALES': ['PANORAMICA','ETIQUETA','CROQUIS','OTRO'],
+  'PASOS AEREOS': ['PINZA 1','PINZA 2','PANORAMICA','OTRO']
 };
 
 let currentProjectName = "";
@@ -221,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let db;
-const request = indexedDB.open("InfraDB", 3); 
+const request = indexedDB.open("InfraDB", 4); 
 
 request.onupgradeneeded = function(e) {
   db = e.target.result;
@@ -245,7 +247,9 @@ function loadRecordsFromDB() {
     if(allRecords.length > 0) {
       document.getElementById('savedProjectsInfo').style.display = 'block';
       document.getElementById('continueSavedBtnRow').style.display = 'flex';
-      document.getElementById('savedProjectsInfo').textContent = `Tienes ${allRecords.length} elemento(s) guardado(s) localmente.`;
+      
+      const pendingCount = allRecords.filter(r => !r.synced).length;
+      document.getElementById('savedProjectsInfo').textContent = `Tienes ${allRecords.length} elementos locales (${pendingCount} pendientes de sincronizar).`;
       
       if(!document.getElementById('projectNameInput').value) {
         let savedName = allRecords[0].projectName || "";
@@ -259,14 +263,21 @@ function loadRecordsFromDB() {
   };
 }
 
-function saveRecordToDB(record) {
+function saveRecordToDB(record, callback) {
   const tx = db.transaction('records', 'readwrite');
   const store = tx.objectStore('records');
   const addReq = store.add(record);
   addReq.onsuccess = function(e) {
     record.id = e.target.result; 
     allRecords.push(record);
+    if(callback) callback(record);
   };
+}
+
+function updateRecordInDB(record) {
+  const tx = db.transaction('records', 'readwrite');
+  const store = tx.objectStore('records');
+  store.put(record);
 }
 
 function deleteRecordFromDB(indexInMemory) {
@@ -329,7 +340,7 @@ function requestGPS() {
   currentLng = "SIN COORDENADAS";
   
   dot.className = 'gps-dot';
-  text.textContent = 'Buscando ubicación GPS...';
+  text.textContent = 'Buscando ubicacion GPS...';
 
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(
@@ -341,15 +352,15 @@ function requestGPS() {
       },
       (error) => {
         dot.className = 'gps-dot error';
-        text.textContent = 'GPS no disponible (Se guardará sin coordenadas)';
-        alert("⚠️ GPS inactivo o permiso denegado. Recuerda activar la ubicación para el registro. El elemento se guardará sin coordenadas.");
+        text.textContent = 'GPS no disponible (Se guardara sin coordenadas)';
+        alert("⚠️ GPS inactivo o permiso denegado. Recuerda activar la ubicacion para el registro. El elemento se guardara sin coordenadas.");
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   } else {
     dot.className = 'gps-dot error';
     text.textContent = 'Tu navegador no soporta GPS';
-    alert("⚠️ Tu navegador no soporta GPS. El elemento se guardará sin coordenadas.");
+    alert("⚠️ Tu navegador no soporta GPS. El elemento se guardara sin coordenadas.");
   }
 }
 
@@ -413,39 +424,92 @@ function renderPhotos() {
     </div>`).join('');
 }
 
-function saveCurrentRecord() {
-  const name = document.getElementById('infraName').value.trim();
-  if (!name) { showNotification('⚠ Falta el nombre del elemento'); return false; }
-  if (currentPhotos.length === 0) { showNotification('⚠ Faltan fotos'); return false; }
-  
-  const record = { 
+function createRecordObject() {
+  return { 
     contractorName: currentContractor,
     projectName: currentProjectName, 
     type: selectedInfra, 
-    name: name, 
+    name: document.getElementById('infraName').value.trim(), 
     lat: currentLat,
     lng: currentLng,
-    photos: [...currentPhotos] 
+    photos: [...currentPhotos],
+    synced: false // Parametro para controlar el estado de subida
   };
-  saveRecordToDB(record);
+}
+
+function validateCurrentRecord() {
+  const name = document.getElementById('infraName').value.trim();
+  if (!name) { showNotification('⚠ Falta el nombre del elemento'); return false; }
+  if (currentPhotos.length === 0) { showNotification('⚠ Faltan fotos'); return false; }
   return true;
 }
 
-function saveAndAddAnother() {
-  if (saveCurrentRecord()) {
-    currentPhotos = [];
-    document.getElementById('infraName').value = '';
-    renderPhotos();
-    requestGPS(); 
-    showNotification('✅ Guardado en memoria. Puede cargar el siguiente.');
-    window.scrollTo(0, 0);
+// Sincronizacion automatica en segundo plano para un solo elemento
+async function autoSyncSingleRecord(record) {
+  showNotification(`⏳ Subiendo fotos de ${record.name} en segundo plano...`);
+  let hasErrors = false;
+
+  for (let photo of record.photos) {
+    let base64Data = photo.dataUrl.split(',')[1];
+    let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
+    
+    let payload = {
+      contractorName: record.contractorName || "General",
+      projectName: record.projectName || "Sin_Proyecto",
+      infraType: record.type,
+      infraName: record.name,
+      photoName: cleanPhotoName + ".jpg",
+      base64Data: base64Data,
+      mimeType: photo.mimeType || 'image/jpeg'
+    };
+
+    try {
+      let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+      let result = await response.json();
+      if(result.status !== 'success') hasErrors = true;
+    } catch(e) {
+      hasErrors = true;
+    }
   }
+
+  if (!hasErrors) {
+    record.synced = true;
+    updateRecordInDB(record);
+    showNotification(`✅ Elemento ${record.name} subido a Google Drive.`);
+  } else {
+    showNotification(`⚠ Fallo de conexion en ${record.name}. Se guardo localmente, sincronice al final.`);
+  }
+  
+  // Si el usuario ya esta en la pantalla de resumen, actualizamos los iconos
+  if(document.getElementById('screen3').classList.contains('active')) {
+    renderSummary();
+  }
+}
+
+function saveAndAddAnother() {
+  if (!validateCurrentRecord()) return;
+  
+  const rec = createRecordObject();
+  saveRecordToDB(rec, (savedRec) => {
+    autoSyncSingleRecord(savedRec); 
+  });
+  
+  currentPhotos = [];
+  document.getElementById('infraName').value = '';
+  renderPhotos();
+  requestGPS(); 
+  window.scrollTo(0, 0);
 }
 
 function saveAndGoSummary() {
   const name = document.getElementById('infraName').value.trim();
   if (name || currentPhotos.length > 0) {
-    if (!saveCurrentRecord()) return; 
+    if (!validateCurrentRecord()) return; 
+    const rec = createRecordObject();
+    saveRecordToDB(rec, (savedRec) => {
+      autoSyncSingleRecord(savedRec);
+      renderSummary(); 
+    });
   }
   currentPhotos = [];
   document.getElementById('infraName').value = '';
@@ -462,8 +526,13 @@ function renderSummary() {
   
   cont.innerHTML = allRecords.map((r, i) => `
     <div class="summary-section">
-      <div class="summary-header"><span>${r.type}: ${r.name}</span>
-      <button class="btn-danger" style="padding:2px 6px" onclick="deleteRecordFromDB(${i})">✕</button></div>
+      <div class="summary-header">
+        <span>
+          ${r.type}: ${r.name} 
+          <span class="sync-badge ${r.synced ? 'done' : 'pending'}">${r.synced ? '☁️ OK' : '⏳ PENDIENTE'}</span>
+        </span>
+        <button class="btn-danger" style="padding:2px 6px" onclick="deleteRecordFromDB(${i})">✕</button>
+      </div>
       <div style="padding: 5px 14px; font-size: 11px; color: var(--text2); background: var(--gray);">GPS: ${r.lat}, ${r.lng}</div>
       <div class="summary-body">${r.photos.map(p => `<div class="summary-photo-row"><img class="summary-thumb" src="${p.dataUrl}"><span>${p.name}</span></div>`).join('')}</div>
     </div>`).join('');
@@ -480,11 +549,11 @@ function goScreen(n) {
 function showNotification(m) {
   const n = document.getElementById('notification');
   n.textContent = m; n.style.display = 'block';
-  setTimeout(() => n.style.display = 'none', 3500);
+  setTimeout(() => n.style.display = 'none', 4000);
 }
 
 function confirmReset() {
-  if(confirm("¿Seguro que quieres borrar TODOS los registros del teléfono? Asegúrate de haber descargado el PDF/ZIP o sincronizado con Drive antes.")) {
+  if(confirm("¿Seguro que quieres borrar TODOS los registros del telefono? Asegurate de haber descargado el PDF/ZIP o sincronizado con Drive antes.")) {
     clearAllDB();
     goScreen(0);
     document.getElementById('btnStep1').disabled = true;
@@ -497,8 +566,10 @@ function confirmReset() {
 }
 
 async function syncWithDrive() {
-  if(allRecords.length === 0) {
-    showNotification('⚠ No hay datos para sincronizar');
+  const pendingRecords = allRecords.filter(r => !r.synced);
+  
+  if(pendingRecords.length === 0) {
+    showNotification('✅ Todos los registros ya estan en Drive');
     return;
   }
 
@@ -507,21 +578,15 @@ async function syncWithDrive() {
   overlay.style.display = 'flex';
 
   let totalPhotos = 0;
-  allRecords.forEach(r => totalPhotos += r.photos.length);
-
-  if(totalPhotos === 0) {
-    overlay.style.display = 'none';
-    showNotification('⚠ No hay fotos para sincronizar');
-    return;
-  }
+  pendingRecords.forEach(r => totalPhotos += r.photos.length);
 
   let syncedPhotos = 0;
-  let hasErrors = false;
+  let globalErrors = false;
 
-  for (let i = 0; i < allRecords.length; i++) {
-    let record = allRecords[i];
-    for (let j = 0; j < record.photos.length; j++) {
-      let photo = record.photos[j];
+  for (let record of pendingRecords) {
+    let recordErrors = false;
+    
+    for (let photo of record.photos) {
       syncText.textContent = `Enviando foto ${syncedPhotos + 1} de ${totalPhotos}...`;
 
       let base64Data = photo.dataUrl.split(',')[1];
@@ -538,29 +603,34 @@ async function syncWithDrive() {
       };
 
       try {
-        let response = await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        
+        let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
         let result = await response.json();
         if(result.status !== 'success') {
           console.error("Error servidor:", result.message);
-          hasErrors = true;
+          recordErrors = true;
+          globalErrors = true;
         }
       } catch(e) {
         console.error("Error red:", e);
-        hasErrors = true;
+        recordErrors = true;
+        globalErrors = true;
       }
       syncedPhotos++;
+    }
+    
+    if(!recordErrors) {
+      record.synced = true;
+      updateRecordInDB(record);
     }
   }
 
   overlay.style.display = 'none';
-  if(hasErrors) {
-    showNotification('⚠ Algunas fotos fallaron. Revisa tu conexión e intenta de nuevo.');
+  renderSummary(); 
+  
+  if(globalErrors) {
+    showNotification('⚠ Algunas fotos fallaron. Revisa tu conexion e intenta de nuevo.');
   } else {
-    showNotification('✅ Sincronización completada con éxito en Drive');
+    showNotification('✅ Sincronizacion manual completada con exito');
   }
 }
 
