@@ -8,16 +8,9 @@
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Roboto:wght@400;500&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --cyan: #00B4D8;
-      --cyan-dark: #0096B4;
-      --cyan-light: #E1F5FB;
-      --green: #5CB85C;
-      --black: #1a1a1a;
-      --gray: #f5f5f5;
-      --gray2: #e0e0e0;
-      --text: #2d2d2d;
-      --text2: #666;
-      --white: #fff;
+      --cyan: #00B4D8; --cyan-dark: #0096B4; --cyan-light: #E1F5FB;
+      --green: #5CB85C; --blue: #0275d8; --black: #1a1a1a;
+      --gray: #f5f5f5; --gray2: #e0e0e0; --text: #2d2d2d; --text2: #666; --white: #fff;
     }
     body { font-family: 'Roboto', sans-serif; color: var(--text); background: #f0f4f8; }
     .app { max-width: 700px; margin: 0 auto; background: var(--white); min-height: 100vh; position: relative; }
@@ -33,36 +26,48 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .screen-title { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 800; color: var(--black); margin-bottom: 6px; }
     .screen-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+    
     .infra-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .infra-card { border: 2px solid var(--gray2); border-radius: 12px; padding: 18px 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); }
     .infra-card.selected { border-color: var(--cyan); background: var(--cyan-light); }
     .infra-icon { font-size: 28px; display: block; margin-bottom: 8px; }
     .infra-label { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+    
     .form-group { margin-bottom: 16px; }
     .form-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; display: block; }
     .form-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 14px; font-family: 'Roboto', sans-serif; outline: none; }
     .form-input:focus { border-color: var(--cyan); }
-    .btn { padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; transition: all 0.2s; text-align: center; }
+    
+    .btn { padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; transition: all 0.2s; text-align: center; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
     .btn-primary { background: var(--cyan); color: var(--white); }
     .btn-secondary { background: var(--gray); color: var(--text); border: 1.5px solid var(--gray2); }
     .btn-danger { background: #fee; color: #c00; border: 1.5px solid #fcc; font-size: 12px; padding: 6px 12px; }
     .btn-green { background: var(--green); color: var(--white); }
+    .btn-blue { background: var(--blue); color: var(--white); }
     .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
     .btn-row .btn { flex: 1; min-width: 140px; }
+    
     .photo-add-panel { border: 1.5px dashed var(--gray2); border-radius: 10px; padding: 16px; background: var(--gray); }
     .photos-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     .photo-item { display: flex; align-items: center; gap: 10px; background: var(--cyan-light); border: 1px solid var(--cyan); border-radius: 8px; padding: 8px 12px; }
     .photo-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; }
     .photo-info { flex: 1; min-width: 0; }
     .photo-name { font-weight: 600; font-size: 13px; color: var(--cyan-dark); }
+    
     .summary-section { border: 1px solid var(--gray2); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
     .summary-header { background: var(--cyan); color: var(--white); padding: 10px 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;}
     .summary-body { padding: 12px 14px; }
     .summary-photo-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--gray2); }
     .summary-thumb { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; }
+    
     .file-input-label { display: flex; justify-content: center; align-items: center; gap: 8px; border: 1.5px solid var(--gray2); border-radius: 8px; padding: 9px 14px; cursor: pointer; font-size: 13px; font-weight: 600; background: var(--white); flex: 1; }
     input[type=file] { display: none; }
-    .notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; display: none; }
+    
+    .notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; display: none; text-align: center; min-width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);}
+    
+    .sync-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; color: white; font-family: 'Nunito', sans-serif; text-align: center; }
+    .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-top-color: var(--cyan); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -75,12 +80,30 @@
     </div>
     <div class="header-text">
       <h1>eSoluciones 360</h1>
-      <p>Registro de Infraestructura de Red</p>
+      <p id="headerProjectName">Registro de Infraestructura</p>
     </div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
 
-  <div class="screen active" id="screen1">
+  <div class="screen active" id="screen0">
+    <div class="screen-title">Nuevo Proyecto</div>
+    <div class="screen-sub">Ingrese el nombre del proyecto o zona de trabajo</div>
+    <div class="form-group">
+      <label class="form-label">Nombre del Proyecto</label>
+      <input class="form-input" id="projectNameInput" type="text" placeholder="Ej: Despliegue Fibra Zona Norte..." />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="startProject()" style="width:100%">Comenzar →</button>
+    </div>
+    <div id="savedProjectsInfo" style="margin-top: 20px; font-size: 12px; color: var(--text2); text-align: center; display: none;">
+      Recuperando registros guardados localmente...
+    </div>
+    <div class="btn-row" id="continueSavedBtnRow" style="display:none;">
+       <button class="btn btn-secondary" onclick="goScreen(3)" style="width:100%">Ver registros pendientes</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen1">
     <div class="screen-title">Tipo de infraestructura</div>
     <div class="infra-grid">
       <div class="infra-card" onclick="selectInfra('ARQUETA')" id="card_ARQUETA"><span class="infra-icon">🏗️</span><div class="infra-label">ARQUETA</div></div>
@@ -89,7 +112,10 @@
       <div class="infra-card" onclick="selectInfra('SALIDAS LATERALES')" id="card_SALIDAS"><span class="infra-icon">↔️</span><div class="infra-label">SALIDAS</div></div>
       <div class="infra-card" onclick="selectInfra('PASOS AÉREOS')" id="card_PASOS" style="grid-column:1/-1;"><span class="infra-icon">🌉</span><div class="infra-label">PASOS AÉREOS</div></div>
     </div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="goStep2()" id="btnStep1" disabled>Continuar →</button></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goScreen(0)">← Proyecto</button>
+      <button class="btn btn-primary" onclick="goStep2()" id="btnStep1" disabled>Continuar →</button>
+    </div>
   </div>
 
   <div class="screen" id="screen2">
@@ -115,28 +141,38 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goScreen(1)">← Cambiar Infra</button>
+      <button class="btn btn-secondary" onclick="goScreen(1)">← Infraestructura</button>
       <button class="btn btn-green" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro elemento</button>
       <button class="btn btn-primary" onclick="saveAndGoSummary()">Ver resumen →</button>
     </div>
   </div>
 
   <div class="screen" id="screen3">
-    <div class="screen-title">Resumen</div>
+    <div class="screen-title">Resumen y Sincronización</div>
     <div id="summaryContainer"></div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goBackToScreen2()">← Añadir más</button>
+      <button class="btn btn-secondary" onclick="goBackToScreen2()">← Añadir más fotos</button>
+      <button class="btn btn-blue" onclick="syncWithDrive()" style="width:100%; font-size: 16px; padding: 14px;">☁️ Sincronizar con Drive</button>
       <button class="btn btn-primary" onclick="generatePDF()">📄 PDF</button>
       <button class="btn btn-green" onclick="downloadPhotos()">⬇ ZIP Fotos</button>
-      <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:10px;">🗑️ Borrar todo y empezar de nuevo</button>
+      <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:20px;">🗑️ Borrar todo localmente (Nueva Inspección)</button>
     </div>
   </div>
 </div>
+
 <div class="notification" id="notification"></div>
+<div class="sync-overlay" id="syncOverlay">
+  <div class="spinner"></div>
+  <h2 id="syncText">Sincronizando...</h2>
+  <p id="syncSubtext">No cierres esta pantalla ni la aplicación.</p>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <script>
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxosUUHnFgOSNZBw0hXX2_Z37sCtBEbTGbKIdZgMTLhEDQ372aEQNmExWbOg6RLoBGT/exec";
+
 const PHOTO_OPTIONS = {
   'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORÁMICA','CROQUIS','OTRO'],
   'CR': ['TAPA CERRADA','CABLEADO','PRISMA 1','PRISMA 2','ETIQUETA','PANORÁMICA','OTRO'],
@@ -145,9 +181,101 @@ const PHOTO_OPTIONS = {
   'PASOS AÉREOS': ['PINZA 1','PINZA 2','PANORÁMICA','OTRO']
 };
 
+let currentProjectName = "";
 let selectedInfra = null;
 let currentPhotos = [];
 let allRecords = [];
+
+// Base de Datos Offline (IndexedDB)
+let db;
+const request = indexedDB.open("InfraDB", 1);
+
+request.onupgradeneeded = function(e) {
+  db = e.target.result;
+  if (!db.objectStoreNames.contains('records')) {
+    db.createObjectStore('records', { keyPath: 'id', autoIncrement: true });
+  }
+};
+
+request.onsuccess = function(e) {
+  db = e.target.result;
+  loadRecordsFromDB(); 
+};
+
+function loadRecordsFromDB() {
+  const tx = db.transaction('records', 'readonly');
+  const store = tx.objectStore('records');
+  const getAll = store.getAll();
+  
+  getAll.onsuccess = function() {
+    allRecords = getAll.result;
+    if(allRecords.length > 0) {
+      document.getElementById('savedProjectsInfo').style.display = 'block';
+      document.getElementById('continueSavedBtnRow').style.display = 'flex';
+      document.getElementById('savedProjectsInfo').textContent = `Tienes ${allRecords.length} elemento(s) guardado(s) localmente.`;
+      
+      if(!document.getElementById('projectNameInput').value) {
+        let savedName = allRecords[0].projectName;
+        // Limpiamos la fecha si ya la tiene para que se vea limpio en el input
+        savedName = savedName.replace(/^\d{4}-\d{2}-\d{2} - /, '');
+        document.getElementById('projectNameInput').value = savedName;
+      }
+    }
+  };
+}
+
+function saveRecordToDB(record) {
+  const tx = db.transaction('records', 'readwrite');
+  const store = tx.objectStore('records');
+  const addReq = store.add(record);
+  addReq.onsuccess = function(e) {
+    record.id = e.target.result; 
+    allRecords.push(record);
+  };
+}
+
+function deleteRecordFromDB(indexInMemory) {
+  const record = allRecords[indexInMemory];
+  if(record && record.id) {
+    const tx = db.transaction('records', 'readwrite');
+    const store = tx.objectStore('records');
+    store.delete(record.id);
+  }
+  allRecords.splice(indexInMemory, 1);
+  renderSummary();
+}
+
+function clearAllDB() {
+  const tx = db.transaction('records', 'readwrite');
+  const store = tx.objectStore('records');
+  store.clear();
+  allRecords = [];
+}
+
+function startProject() {
+  let name = document.getElementById('projectNameInput').value.trim();
+  if(!name) { showNotification("⚠ Introduce un nombre de proyecto"); return; }
+
+  // Verifica si el nombre ya tiene el formato YYYY-MM-DD al principio
+  if (!name.match(/^\d{4}-\d{2}-\d{2} - /)) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = ("0" + (today.getMonth() + 1)).slice(-2);
+    const dd = ("0" + today.getDate()).slice(-2);
+    const dateString = yyyy + "-" + mm + "-" + dd;
+    
+    // Concatena la fecha al principio del nombre ingresado
+    name = dateString + " - " + name;
+  }
+
+  currentProjectName = name;
+  document.getElementById('headerProjectName').textContent = "Proyecto: " + currentProjectName;
+  
+  // Actualiza el cuadro de texto para que el técnico vea el nombre final
+  document.getElementById('projectNameInput').value = currentProjectName;
+  
+  goScreen(1);
+}
 
 function selectInfra(type) {
   selectedInfra = type;
@@ -160,13 +288,17 @@ function selectInfra(type) {
 function goStep2() {
   currentPhotos = [];
   document.getElementById('infraName').value = '';
-  document.getElementById('screen2Title').textContent = 'Datos: ' + selectedInfra;
+  document.getElementById('screen2Title').textContent = selectedInfra;
   populateOptions();
   renderPhotos();
   goScreen(2);
 }
 
 function goBackToScreen2() {
+  if (!selectedInfra) {
+    goScreen(1);
+    return;
+  }
   currentPhotos = [];
   document.getElementById('infraName').value = '';
   renderPhotos();
@@ -187,9 +319,15 @@ function addPhoto(input) {
   const file = input.files[0];
   if (!file) return;
   const name = document.getElementById('photoNameSelect').value === 'OTRO' ? document.getElementById('otroInput').value : document.getElementById('photoNameSelect').value;
+  
   const reader = new FileReader();
   reader.onload = e => {
-    currentPhotos.push({ name: name || 'Foto', dataUrl: e.target.result, fileName: file.name });
+    currentPhotos.push({ 
+      name: name || 'Foto', 
+      dataUrl: e.target.result, 
+      fileName: file.name,
+      mimeType: file.type
+    });
     renderPhotos();
     input.value = '';
   };
@@ -207,15 +345,11 @@ function renderPhotos() {
 
 function saveCurrentRecord() {
   const name = document.getElementById('infraName').value.trim();
-  if (!name) {
-    showNotification('⚠ Falta el nombre del elemento');
-    return false;
-  }
-  if (currentPhotos.length === 0) {
-    showNotification('⚠ Faltan fotos');
-    return false;
-  }
-  allRecords.push({ type: selectedInfra, name, photos: [...currentPhotos] });
+  if (!name) { showNotification('⚠ Falta el nombre del elemento'); return false; }
+  if (currentPhotos.length === 0) { showNotification('⚠ Faltan fotos'); return false; }
+  
+  const record = { projectName: currentProjectName, type: selectedInfra, name: name, photos: [...currentPhotos] };
+  saveRecordToDB(record);
   return true;
 }
 
@@ -224,7 +358,7 @@ function saveAndAddAnother() {
     currentPhotos = [];
     document.getElementById('infraName').value = '';
     renderPhotos();
-    showNotification('✅ Guardado. Puede cargar el siguiente.');
+    showNotification('✅ Guardado en memoria. Puede cargar el siguiente.');
     window.scrollTo(0, 0);
   }
 }
@@ -234,38 +368,118 @@ function saveAndGoSummary() {
   if (name || currentPhotos.length > 0) {
     if (!saveCurrentRecord()) return; 
   }
+  currentPhotos = [];
+  document.getElementById('infraName').value = '';
   renderSummary();
   goScreen(3);
 }
 
 function renderSummary() {
   const cont = document.getElementById('summaryContainer');
+  if(allRecords.length === 0) {
+    cont.innerHTML = "<div style='text-align:center; padding: 20px; color: #666;'>No hay registros guardados.</div>";
+    return;
+  }
+  
   cont.innerHTML = allRecords.map((r, i) => `
     <div class="summary-section">
-      <div class="summary-header"><span>${r.type}: ${r.name}</span><button class="btn-danger" style="padding:2px 6px" onclick="allRecords.splice(${i},1);renderSummary()">✕</button></div>
+      <div class="summary-header"><span>${r.projectName ? r.projectName + ' - ' : ''}${r.type}: ${r.name}</span>
+      <button class="btn-danger" style="padding:2px 6px" onclick="deleteRecordFromDB(${i})">✕</button></div>
       <div class="summary-body">${r.photos.map(p => `<div class="summary-photo-row"><img class="summary-thumb" src="${p.dataUrl}"><span>${p.name}</span></div>`).join('')}</div>
     </div>`).join('');
 }
 
 function goScreen(n) {
+  if (n === 3) renderSummary();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen' + n).classList.add('active');
-  document.getElementById('progressFill').style.width = (n * 33.3) + '%';
+  document.getElementById('progressFill').style.width = ((n+1) * 25) + '%';
   window.scrollTo(0, 0);
 }
 
 function showNotification(m) {
   const n = document.getElementById('notification');
   n.textContent = m; n.style.display = 'block';
-  setTimeout(() => n.style.display = 'none', 3000);
+  setTimeout(() => n.style.display = 'none', 3500);
 }
 
 function confirmReset() {
-  if(confirm("¿Seguro que quieres borrar todos los registros y fotos?")) {
-    allRecords = [];
-    goScreen(1);
+  if(confirm("¿Seguro que quieres borrar TODOS los registros del teléfono? Asegúrate de haber descargado el PDF/ZIP o sincronizado con Drive antes.")) {
+    clearAllDB();
+    goScreen(0);
     document.getElementById('btnStep1').disabled = true;
     document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('projectNameInput').value = '';
+    document.getElementById('savedProjectsInfo').style.display = 'none';
+    document.getElementById('continueSavedBtnRow').style.display = 'none';
+    showNotification("Memoria limpiada");
+  }
+}
+
+async function syncWithDrive() {
+  if(allRecords.length === 0) {
+    showNotification('⚠ No hay datos para sincronizar');
+    return;
+  }
+
+  const overlay = document.getElementById('syncOverlay');
+  const syncText = document.getElementById('syncText');
+  overlay.style.display = 'flex';
+
+  let totalPhotos = 0;
+  allRecords.forEach(r => totalPhotos += r.photos.length);
+
+  if(totalPhotos === 0) {
+    overlay.style.display = 'none';
+    showNotification('⚠ No hay fotos para sincronizar');
+    return;
+  }
+
+  let syncedPhotos = 0;
+  let hasErrors = false;
+
+  for (let i = 0; i < allRecords.length; i++) {
+    let record = allRecords[i];
+    for (let j = 0; j < record.photos.length; j++) {
+      let photo = record.photos[j];
+      syncText.textContent = `Enviando foto ${syncedPhotos + 1} de ${totalPhotos}...`;
+
+      let base64Data = photo.dataUrl.split(',')[1];
+      let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
+      
+      let payload = {
+        projectName: record.projectName || "Sin_Proyecto",
+        infraType: record.type,
+        infraName: record.name,
+        photoName: cleanPhotoName + ".jpg",
+        base64Data: base64Data,
+        mimeType: photo.mimeType || 'image/jpeg'
+      };
+
+      try {
+        let response = await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        
+        let result = await response.json();
+        if(result.status !== 'success') {
+          console.error("Error servidor:", result.message);
+          hasErrors = true;
+        }
+      } catch(e) {
+        console.error("Error red:", e);
+        hasErrors = true;
+      }
+      syncedPhotos++;
+    }
+  }
+
+  overlay.style.display = 'none';
+  if(hasErrors) {
+    showNotification('⚠ Algunas fotos fallaron. Revisa tu conexión e intenta de nuevo.');
+  } else {
+    showNotification('✅ Sincronización completada con éxito en Drive');
   }
 }
 
@@ -277,12 +491,14 @@ async function generatePDF() {
   let y = 20;
 
   allRecords.forEach(r => {
-    doc.setFontSize(16); doc.text(`${r.type}: ${r.name}`, 15, y);
+    doc.setFontSize(14); doc.text(`Proyecto: ${r.projectName} | ${r.type}: ${r.name}`, 15, y);
     y += 10;
     r.photos.forEach(p => {
       if (y > 250) { doc.addPage(); y = 20; }
-      doc.addImage(p.dataUrl, 'JPEG', 15, y, 50, 40);
-      doc.setFontSize(10); doc.text(p.name, 70, y + 20);
+      try {
+        doc.addImage(p.dataUrl, 'JPEG', 15, y, 50, 40);
+        doc.setFontSize(10); doc.text(p.name, 70, y + 20);
+      } catch(e) { }
       y += 45;
     });
     y += 10;
@@ -296,8 +512,9 @@ async function downloadPhotos() {
   showNotification('⏳ Preparando ZIP...');
   const zip = new JSZip();
   allRecords.forEach(r => {
-    const folder = zip.folder(r.name);
-    r.photos.forEach(p => folder.file(p.name + ".jpg", p.dataUrl.split(',')[1], {base64: true}));
+    const projFolder = zip.folder(r.projectName || "Proyecto");
+    const infraFolder = projFolder.folder(r.type + "_" + r.name);
+    r.photos.forEach(p => infraFolder.file(p.name + ".jpg", p.dataUrl.split(',')[1], {base64: true}));
   });
   const blob = await zip.generateAsync({type:"blob"});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "fotos_esoluciones.zip"; a.click();
