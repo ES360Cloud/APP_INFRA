@@ -44,6 +44,7 @@
     .btn-primary { background: var(--cyan); color: var(--white); }
     .btn-secondary { background: var(--gray); color: var(--text); border: 1.5px solid var(--gray2); }
     .btn-danger { background: #fee; color: #c00; border: 1.5px solid #fcc; font-size: 12px; padding: 6px 12px; }
+    .btn-edit { background: var(--cyan-light); color: var(--cyan-dark); border: 1.5px solid var(--cyan); font-size: 12px; padding: 6px 12px; margin-right: 6px;}
     .btn-green { background: var(--green); color: var(--white); }
     .btn-blue { background: var(--blue); color: var(--white); }
     .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
@@ -165,9 +166,10 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goScreen(1)">← Atras</button>
-      <button class="btn btn-green" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro elemento</button>
-      <button class="btn btn-primary" onclick="saveAndGoSummary()">Ver resumen →</button>
+      <button class="btn btn-secondary" onclick="cancelEditOrGoBack()">← Atras</button>
+      <button class="btn btn-green" id="btnSaveAdd" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro elemento</button>
+      <button class="btn btn-primary" id="btnSaveSummary" onclick="saveAndGoSummary()">Ver resumen →</button>
+      <button class="btn btn-blue" id="btnUpdateEdit" onclick="updateEdit()" style="display:none; flex: 2; width: 100%;">💾 Guardar Edicion</button>
     </div>
   </div>
 
@@ -195,7 +197,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwJY4wSILc6sm7y80QOaAIROR30IXv0RfYeE-dTlsFtECsxcQvUw-onr0JDCI_bA2nF/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWWTo2zP8hUjJDIMwyRgpSr3qZwXufwIZ6VQpo8ReepDI4EEPDHalgrvdcCzu9uve5/exec";
 
 const PHOTO_OPTIONS = {
   'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORAMICA','CROQUIS','OTRO'],
@@ -221,6 +223,8 @@ let allRecords = [];
 
 let currentLat = "SIN COORDENADAS";
 let currentLng = "SIN COORDENADAS";
+
+let editingRecordIndex = -1; // Nueva variable para controlar la edicion
 
 document.addEventListener("DOMContentLoaded", () => {
   const savedContractor = localStorage.getItem("esoluciones_contractor");
@@ -371,7 +375,15 @@ function requestGPS() {
   }
 }
 
+function resetScreen2Buttons() {
+  document.getElementById('btnSaveAdd').style.display = 'inline-flex';
+  document.getElementById('btnSaveSummary').style.display = 'inline-flex';
+  document.getElementById('btnUpdateEdit').style.display = 'none';
+}
+
 function goStep2() {
+  editingRecordIndex = -1;
+  resetScreen2Buttons();
   currentPhotos = [];
   
   const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
@@ -390,6 +402,8 @@ function goBackToScreen2() {
     goScreen(1);
     return;
   }
+  editingRecordIndex = -1;
+  resetScreen2Buttons();
   currentPhotos = [];
   
   const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
@@ -399,6 +413,16 @@ function goBackToScreen2() {
   renderPhotos();
   requestGPS(); 
   goScreen(2);
+}
+
+function cancelEditOrGoBack() {
+  if (editingRecordIndex !== -1) {
+    editingRecordIndex = -1;
+    resetScreen2Buttons();
+    goScreen(3);
+  } else {
+    goScreen(1);
+  }
 }
 
 function populateOptions() {
@@ -544,19 +568,19 @@ function saveAndAddAnother() {
   if (!validateCurrentRecord()) return;
   
   const rec = createRecordObject();
+  
   saveRecordToDB(rec, (savedRec) => {
     autoSyncSingleRecord(savedRec); 
+    
+    currentPhotos = [];
+    const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
+    const count = allRecords.filter(r => r.type === selectedInfra).length + 1;
+    document.getElementById('infraName').value = prefix + ' ' + count;
+    
+    renderPhotos();
+    requestGPS(); 
+    window.scrollTo(0, 0);
   });
-  
-  currentPhotos = [];
-  
-  const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
-  const count = allRecords.filter(r => r.type === selectedInfra).length + 1;
-  document.getElementById('infraName').value = prefix + ' ' + count;
-  
-  renderPhotos();
-  requestGPS(); 
-  window.scrollTo(0, 0);
 }
 
 function saveAndGoSummary() {
@@ -566,11 +590,60 @@ function saveAndGoSummary() {
     const rec = createRecordObject();
     saveRecordToDB(rec, (savedRec) => {
       autoSyncSingleRecord(savedRec);
-      renderSummary(); 
+      currentPhotos = [];
+      document.getElementById('infraName').value = '';
+      renderSummary();
+      goScreen(3);
     });
+  } else {
+    currentPhotos = [];
+    document.getElementById('infraName').value = '';
+    renderSummary();
+    goScreen(3);
   }
-  currentPhotos = [];
-  document.getElementById('infraName').value = '';
+}
+
+function editRecord(index) {
+  editingRecordIndex = index;
+  const rec = allRecords[index];
+  
+  selectedInfra = rec.type;
+  currentPhotos = [...rec.photos]; 
+  document.getElementById('infraName').value = rec.name;
+  document.getElementById('screen2Title').textContent = "Editando: " + rec.type;
+
+  populateOptions();
+  renderPhotos();
+
+  currentLat = rec.lat;
+  currentLng = rec.lng;
+  const dot = document.getElementById('gpsDot');
+  const text = document.getElementById('gpsText');
+  dot.className = 'gps-dot active';
+  text.textContent = `GPS Guardado (${currentLat}, ${currentLng})`;
+
+  document.getElementById('btnSaveAdd').style.display = 'none';
+  document.getElementById('btnSaveSummary').style.display = 'none';
+  document.getElementById('btnUpdateEdit').style.display = 'inline-flex';
+
+  goScreen(2);
+}
+
+function updateEdit() {
+  if (!validateCurrentRecord()) return;
+
+  const rec = allRecords[editingRecordIndex];
+  rec.name = document.getElementById('infraName').value.trim();
+  rec.photos = [...currentPhotos];
+  rec.synced = false; 
+
+  updateRecordInDB(rec);
+  
+  editingRecordIndex = -1;
+  resetScreen2Buttons();
+  
+  autoSyncSingleRecord(rec);
+
   renderSummary();
   goScreen(3);
 }
@@ -589,7 +662,10 @@ function renderSummary() {
           ${r.type}: ${r.name} 
           <span class="sync-badge ${r.synced ? 'done' : 'pending'}">${r.synced ? '☁️ OK' : '⏳ PENDIENTE'}</span>
         </span>
-        <button class="btn-danger" style="padding:2px 6px" onclick="deleteRecordFromDB(${i})">✕</button>
+        <div>
+          <button class="btn-edit" onclick="editRecord(${i})">✏️</button>
+          <button class="btn-danger" style="padding:4px 8px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;" onclick="deleteRecordFromDB(${i})">✕</button>
+        </div>
       </div>
       <div style="padding: 5px 14px; font-size: 11px; color: var(--text2); background: var(--gray);">GPS: ${r.lat}, ${r.lng}</div>
       <div class="summary-body">${r.photos.map(p => `<div class="summary-photo-row"><img class="summary-thumb" src="${p.dataUrl}"><span>${p.name}</span></div>`).join('')}</div>
