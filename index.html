@@ -195,8 +195,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-// URL precargada con tu Script de Google
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2EHHA5kfzrV2kCpjsHycyeTz3CjWF6jNuvP48BJYRjRUGWtmmwRoM4rxxwY6bSFX4/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwJY4wSILc6sm7y80QOaAIROR30IXv0RfYeE-dTlsFtECsxcQvUw-onr0JDCI_bA2nF/exec";
 
 const PHOTO_OPTIONS = {
   'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORAMICA','CROQUIS','OTRO'],
@@ -433,7 +432,7 @@ function createRecordObject() {
     lat: currentLat,
     lng: currentLng,
     photos: [...currentPhotos],
-    synced: false // Parametro para controlar el estado de subida
+    synced: false
   };
 }
 
@@ -444,12 +443,12 @@ function validateCurrentRecord() {
   return true;
 }
 
-// Sincronizacion automatica en segundo plano para un solo elemento
 async function autoSyncSingleRecord(record) {
   showNotification(`⏳ Subiendo fotos de ${record.name} en segundo plano...`);
   let hasErrors = false;
 
-  for (let photo of record.photos) {
+  for (let i = 0; i < record.photos.length; i++) {
+    let photo = record.photos[i];
     let base64Data = photo.dataUrl.split(',')[1];
     let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
     
@@ -460,7 +459,10 @@ async function autoSyncSingleRecord(record) {
       infraName: record.name,
       photoName: cleanPhotoName + ".jpg",
       base64Data: base64Data,
-      mimeType: photo.mimeType || 'image/jpeg'
+      mimeType: photo.mimeType || 'image/jpeg',
+      lat: record.lat,
+      lng: record.lng,
+      isFirstPhoto: (i === 0)
     };
 
     try {
@@ -480,7 +482,6 @@ async function autoSyncSingleRecord(record) {
     showNotification(`⚠ Fallo de conexion en ${record.name}. Se guardo localmente, sincronice al final.`);
   }
   
-  // Si el usuario ya esta en la pantalla de resumen, actualizamos los iconos
   if(document.getElementById('screen3').classList.contains('active')) {
     renderSummary();
   }
@@ -586,7 +587,8 @@ async function syncWithDrive() {
   for (let record of pendingRecords) {
     let recordErrors = false;
     
-    for (let photo of record.photos) {
+    for (let i = 0; i < record.photos.length; i++) {
+      let photo = record.photos[i];
       syncText.textContent = `Enviando foto ${syncedPhotos + 1} de ${totalPhotos}...`;
 
       let base64Data = photo.dataUrl.split(',')[1];
@@ -599,7 +601,10 @@ async function syncWithDrive() {
         infraName: record.name,
         photoName: cleanPhotoName + ".jpg",
         base64Data: base64Data,
-        mimeType: photo.mimeType || 'image/jpeg'
+        mimeType: photo.mimeType || 'image/jpeg',
+        lat: record.lat,
+        lng: record.lng,
+        isFirstPhoto: (i === 0)
       };
 
       try {
@@ -664,20 +669,14 @@ async function downloadPhotos() {
   showNotification('⏳ Preparando ZIP...');
   const zip = new JSZip();
   
-  let csvContent = "Elemento,Tipo,Proyecto,Contrata,Latitud,Longitud\n";
-
   allRecords.forEach(r => {
     const contractorFolder = zip.folder(r.contractorName || "Contratista");
     const projFolder = contractorFolder.folder(r.projectName || "Proyecto");
     const infraFolder = projFolder.folder(r.type + "_" + r.name);
     
     r.photos.forEach(p => infraFolder.file(p.name + ".jpg", p.dataUrl.split(',')[1], {base64: true}));
-    
-    csvContent += `${r.name},${r.type},${r.projectName},${r.contractorName},${r.lat || 'SIN COORDENADAS'},${r.lng || 'SIN COORDENADAS'}\n`;
   });
   
-  zip.file("coordenadas_mapa.csv", csvContent);
-
   const blob = await zip.generateAsync({type:"blob"});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "fotos_esoluciones.zip"; a.click();
   showNotification('✅ ZIP descargado');
