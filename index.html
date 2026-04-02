@@ -86,12 +86,19 @@
   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
 
   <div class="screen active" id="screen0">
-    <div class="screen-title">Nuevo Proyecto</div>
-    <div class="screen-sub">Ingrese el nombre del proyecto o zona de trabajo</div>
+    <div class="screen-title">Inicio de Sesión y Proyecto</div>
+    <div class="screen-sub">Identifique a su empresa y el proyecto a trabajar</div>
+    
     <div class="form-group">
-      <label class="form-label">Nombre del Proyecto</label>
-      <input class="form-input" id="projectNameInput" type="text" placeholder="Ej: Despliegue Fibra Zona Norte..." />
+      <label class="form-label">Nombre de Contrata / Empresa</label>
+      <input class="form-input" id="contractorInput" type="text" placeholder="Ej: JAIRO" style="text-transform: uppercase;" />
     </div>
+
+    <div class="form-group">
+      <label class="form-label">Nombre del Proyecto / Ciudad</label>
+      <input class="form-input" id="projectNameInput" type="text" placeholder="Ej: ALORA" />
+    </div>
+    
     <div class="btn-row">
       <button class="btn btn-primary" onclick="startProject()" style="width:100%">Comenzar →</button>
     </div>
@@ -171,7 +178,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxosUUHnFgOSNZBw0hXX2_Z37sCtBEbTGbKIdZgMTLhEDQ372aEQNmExWbOg6RLoBGT/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2EHHA5kfzrV2kCpjsHycyeTz3CjWF6jNuvP48BJYRjRUGWtmmwRoM4rxxwY6bSFX4/exec";
 
 const PHOTO_OPTIONS = {
   'ARQUETA': ['RECORRIDO','PRISMA 1','PRISMA 2','ETIQUETA 1','ETIQUETA 2','PANORÁMICA','CROQUIS','OTRO'],
@@ -182,13 +189,22 @@ const PHOTO_OPTIONS = {
 };
 
 let currentProjectName = "";
+let currentContractor = "";
 let selectedInfra = null;
 let currentPhotos = [];
 let allRecords = [];
 
+// Autocompletar contrata si se guardó antes
+document.addEventListener("DOMContentLoaded", () => {
+  const savedContractor = localStorage.getItem("esoluciones_contractor");
+  if (savedContractor) {
+    document.getElementById("contractorInput").value = savedContractor;
+  }
+});
+
 // Base de Datos Offline (IndexedDB)
 let db;
-const request = indexedDB.open("InfraDB", 1);
+const request = indexedDB.open("InfraDB", 2); 
 
 request.onupgradeneeded = function(e) {
   db = e.target.result;
@@ -215,10 +231,12 @@ function loadRecordsFromDB() {
       document.getElementById('savedProjectsInfo').textContent = `Tienes ${allRecords.length} elemento(s) guardado(s) localmente.`;
       
       if(!document.getElementById('projectNameInput').value) {
-        let savedName = allRecords[0].projectName;
-        // Limpiamos la fecha si ya la tiene para que se vea limpio en el input
+        let savedName = allRecords[0].projectName || "";
         savedName = savedName.replace(/^\d{4}-\d{2}-\d{2} - /, '');
         document.getElementById('projectNameInput').value = savedName;
+      }
+      if(!document.getElementById('contractorInput').value && allRecords[0].contractorName) {
+        document.getElementById('contractorInput').value = allRecords[0].contractorName;
       }
     }
   };
@@ -253,8 +271,15 @@ function clearAllDB() {
 }
 
 function startProject() {
+  let contractor = document.getElementById('contractorInput').value.trim().toUpperCase();
   let name = document.getElementById('projectNameInput').value.trim();
+  
+  if(!contractor) { showNotification("⚠ Introduce la empresa/contrata"); return; }
   if(!name) { showNotification("⚠ Introduce un nombre de proyecto"); return; }
+
+  // Guardar contratista en el móvil para la próxima vez
+  localStorage.setItem("esoluciones_contractor", contractor);
+  currentContractor = contractor;
 
   // Verifica si el nombre ya tiene el formato YYYY-MM-DD al principio
   if (!name.match(/^\d{4}-\d{2}-\d{2} - /)) {
@@ -263,15 +288,11 @@ function startProject() {
     const mm = ("0" + (today.getMonth() + 1)).slice(-2);
     const dd = ("0" + today.getDate()).slice(-2);
     const dateString = yyyy + "-" + mm + "-" + dd;
-    
-    // Concatena la fecha al principio del nombre ingresado
     name = dateString + " - " + name;
   }
 
   currentProjectName = name;
-  document.getElementById('headerProjectName').textContent = "Proyecto: " + currentProjectName;
-  
-  // Actualiza el cuadro de texto para que el técnico vea el nombre final
+  document.getElementById('headerProjectName').textContent = currentContractor + " | " + currentProjectName;
   document.getElementById('projectNameInput').value = currentProjectName;
   
   goScreen(1);
@@ -348,7 +369,13 @@ function saveCurrentRecord() {
   if (!name) { showNotification('⚠ Falta el nombre del elemento'); return false; }
   if (currentPhotos.length === 0) { showNotification('⚠ Faltan fotos'); return false; }
   
-  const record = { projectName: currentProjectName, type: selectedInfra, name: name, photos: [...currentPhotos] };
+  const record = { 
+    contractorName: currentContractor,
+    projectName: currentProjectName, 
+    type: selectedInfra, 
+    name: name, 
+    photos: [...currentPhotos] 
+  };
   saveRecordToDB(record);
   return true;
 }
@@ -383,7 +410,7 @@ function renderSummary() {
   
   cont.innerHTML = allRecords.map((r, i) => `
     <div class="summary-section">
-      <div class="summary-header"><span>${r.projectName ? r.projectName + ' - ' : ''}${r.type}: ${r.name}</span>
+      <div class="summary-header"><span>${r.type}: ${r.name}</span>
       <button class="btn-danger" style="padding:2px 6px" onclick="deleteRecordFromDB(${i})">✕</button></div>
       <div class="summary-body">${r.photos.map(p => `<div class="summary-photo-row"><img class="summary-thumb" src="${p.dataUrl}"><span>${p.name}</span></div>`).join('')}</div>
     </div>`).join('');
@@ -448,6 +475,7 @@ async function syncWithDrive() {
       let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
       
       let payload = {
+        contractorName: record.contractorName || "General",
         projectName: record.projectName || "Sin_Proyecto",
         infraType: record.type,
         infraName: record.name,
@@ -491,7 +519,7 @@ async function generatePDF() {
   let y = 20;
 
   allRecords.forEach(r => {
-    doc.setFontSize(14); doc.text(`Proyecto: ${r.projectName} | ${r.type}: ${r.name}`, 15, y);
+    doc.setFontSize(14); doc.text(`${r.contractorName} | ${r.projectName} | ${r.type}: ${r.name}`, 15, y);
     y += 10;
     r.photos.forEach(p => {
       if (y > 250) { doc.addPage(); y = 20; }
@@ -512,7 +540,8 @@ async function downloadPhotos() {
   showNotification('⏳ Preparando ZIP...');
   const zip = new JSZip();
   allRecords.forEach(r => {
-    const projFolder = zip.folder(r.projectName || "Proyecto");
+    const contractorFolder = zip.folder(r.contractorName || "Contratista");
+    const projFolder = contractorFolder.folder(r.projectName || "Proyecto");
     const infraFolder = projFolder.folder(r.type + "_" + r.name);
     r.photos.forEach(p => infraFolder.file(p.name + ".jpg", p.dataUrl.split(',')[1], {base64: true}));
   });
