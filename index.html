@@ -23,7 +23,7 @@
     .title-row { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 2px;}
     .header-text h1 { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; color: var(--cyan); letter-spacing: 0.5px; margin: 0; }
     .header-text p { font-size: 11px; color: #aaa; margin: 0; }
-    .version-badge { font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 500; color: #aaa; background: rgba(255,255,255, 0.1); border: 1px solid rgba(255,255,255, 0.2); padding: 1px 5px; border-radius: 10px; white-space: nowrap; }
+    .version-badge { font-family: 'Roboto', sans-serif; font-size: 10px; font-weight: 500; color: #fff; background: #00B4D8; border: 1px solid rgba(255,255,255, 0.2); padding: 2px 6px; border-radius: 10px; white-space: nowrap; }
 
     .progress-bar { height: 3px; background: var(--gray2); }
     .progress-fill { height: 100%; background: var(--cyan); transition: width 0.4s ease; }
@@ -101,7 +101,7 @@
     <div class="header-text">
       <div class="title-row">
         <h1>eSoluciones 360</h1>
-        <span class="version-badge">E360 APP Infra & EdR v3.1</span>
+        <span class="version-badge">v4.1</span>
       </div>
       <p id="headerProjectName">Registro de Inspeccion</p>
     </div>
@@ -144,7 +144,7 @@
           <div class="infra-label">CTO</div>
         </div>
         <div class="infra-card" onclick="selectInfra('MINICAU')" id="card_MINICAU">
-          <svg viewBox="0 0 64 64" class="infra-icon" style="width:32px;height:32px;"><rect x="8" y="16" width="48" height="32" rx="4" fill="#eee" stroke="#333" stroke-width="2"/><path d="M16 28h32M16 36h32" stroke="#aaa" stroke-width="1"/></svg>
+          <svg viewBox="0 0 64 64" class="infra-icon" style="width:32px;height:32px;"><rect x="8" y="16" width="48" height="32" rx="4" fill="#eee" stroke="#333" stroke-width="2"/><path d="M16 36h32M16 36h32" stroke="#aaa" stroke-width="1"/></svg>
           <div class="infra-label">MINICAU</div>
         </div>
       </div>
@@ -240,19 +240,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-// ---------- AQUI SE ACTUALIZO LA URL ----------
+// URL SCRIPT ACTUALIZADA
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzipnUpTqNIpdPJ_gXTMQinWm9qJdcQP4VURhOtnVxYKzWzzThAh_F_ft9zmiBsIDLk/exec";
-// ----------------------------------------------
 
+// ---------- LOGICA DE ETIQUETAS ACTUALIZADA ----------
 const PHOTO_OPTIONS = {
-  'ARQUETA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
-  'CAMARA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','ENTRADA CR','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
+  'ARQUETA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','RECORRIDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
+  'CAMARA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','ENTRADA CR','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','RECORRIDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
   'POSTES': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','OTRO'],
-  'SALIDAS LATERALES': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO'],
+  'SALIDAS LATERALES': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','ETIQUETA'],
   'PASOS AEREOS': ['PANORAMICA','PINZA 1','PINZA 2'],
-  'CTO': ['ABIERTA 1','ABIERTA 2','ABIERTA 3','FUSIONES','CERRADA','PANORAMICA','ELEMENTOS','CTO','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','FOTO POTENCIA','OTROS'],
-  'MINICAU': ['ABIERTA 1','ABIERTA 2','ABIERTA 3','FUSIONES 1','FUSIONES 2','FUSIONES 3','FUSIONES 4','CERRADA','PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','OTROS']
+  'CTO': ['ABIERTA 1','ABIERTA 2','ABIERTA 3','FUSIONES','CERRADA','PANORAMICA','ETIQUETA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','FOTO POTENCIA','OTROS'],
+  'MINICAU': ['ABIERTA 1','ABIERTA 2','ABIERTA 3','FUSIONES 1','FUSIONES 2','FUSIONES 3','FUSIONES 4','CERRADA','PANORAMICA','ETIQUETA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','OTROS']
 };
+// -------------------------------------------------------
 
 const PREFIX_MAP = {
   'ARQUETA': 'ARQ',
