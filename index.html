@@ -222,9 +222,9 @@
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goBackToScreen2()">← Agregar mas fotos</button>
       <button class="btn btn-blue" onclick="syncWithDrive()" style="width:100%; font-size: 16px; padding: 14px;">☁️ Sincronizar fallidos con Drive</button>
-      <button class="btn btn-primary" onclick="generatePDF()">📄 PDF</button>
+      <button class="btn btn-primary" onclick="generatePDF()">📄 Descargar y Subir PDF</button>
       <button class="btn btn-green" onclick="downloadPhotos()">⬇ ZIP Fotos y Mapa</button>
-      <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:20px;">🗑️ Borrar todo localmente (Nueva Inspeccion)</button>
+      <button class="btn btn-danger" onclick="confirmReset()" style="width:100%; margin-top:20px;">🗑️ Finalizar Inspeccion (Borrar App)</button>
     </div>
   </div>
 </div>
@@ -240,7 +240,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWWTo2zP8hUjJDIMwyRgpSr3qZwXufwIZ6VQpo8ReepDI4EEPDHalgrvdcCzu9uve5/exec";
+// ---------- AQUI SE ACTUALIZO LA URL ----------
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvvUZlURmHwaDqRd_T43XWS5C8cR1kWtJOJ582FCOThvINnUt1UZv4RyVsv2jk9-5S/exec";
+// ----------------------------------------------
 
 const PHOTO_OPTIONS = {
   'ARQUETA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
@@ -762,16 +764,18 @@ function showNotification(m) {
   setTimeout(() => n.style.display = 'none', 4000);
 }
 
-function confirmReset() {
-  if(confirm("¿Seguro que quieres borrar TODOS los registros del telefono? Asegurate de haber descargado el PDF/ZIP o sincronizado con Drive antes.")) {
-    clearAllDB();
-    goScreen(0);
-    document.getElementById('btnStep1').disabled = true;
-    document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById('projectNameInput').value = '';
-    document.getElementById('savedProjectsInfo').style.display = 'none';
-    document.getElementById('continueSavedBtnRow').style.display = 'none';
-    showNotification("Memoria limpiada");
+async function confirmReset() {
+  if(confirm("¿Has generado y subido el PDF final a Drive? Si no lo has hecho, dale a Cancelar, genera el PDF y luego vuelve aqui.")) {
+    if(confirm("ATENCION: Esto borrara permanentemente la memoria local de este telefono. ¿Seguro que deseas empezar una Nueva Inspeccion?")) {
+      clearAllDB();
+      goScreen(0);
+      document.getElementById('btnStep1').disabled = true;
+      document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('projectNameInput').value = '';
+      document.getElementById('savedProjectsInfo').style.display = 'none';
+      document.getElementById('continueSavedBtnRow').style.display = 'none';
+      showNotification("Memoria limpiada con exito");
+    }
   }
 }
 
@@ -848,7 +852,6 @@ async function syncWithDrive() {
   }
 }
 
-// HELPER PARA DIMENSIONES DE IMAGEN PDF
 async function getImageDims(dataUrl) {
   return new Promise(resolve => {
     const img = new Image();
@@ -858,12 +861,11 @@ async function getImageDims(dataUrl) {
   });
 }
 
-// HELPER PARA DESCARGAR PREVIEW DE MAPA (API ABIERTA)
 async function getStaticMapUrl(lat, lng) {
   return new Promise((resolve) => {
     const latF = parseFloat(lat);
     const lngF = parseFloat(lng);
-    const box = 0.005; // Ajuste del zoom visual
+    const box = 0.005; 
     const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/export?bbox=${lngF-box},${latF-box},${lngF+box},${latF+box}&bboxSR=4326&imageSR=4326&size=500,250&format=png&f=image`;
     
     const img = new Image();
@@ -874,7 +876,6 @@ async function getStaticMapUrl(lat, lng) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
       
-      // Dibujar Pin Geografico
       ctx.fillStyle = "rgba(0, 180, 216, 0.3)";
       ctx.beginPath(); ctx.arc(250, 125, 15, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "#0275d8";
@@ -888,10 +889,14 @@ async function getStaticMapUrl(lat, lng) {
   });
 }
 
-// GENERADOR DE PDF AVANZADO
 async function generatePDF() {
   if (!allRecords.length) { showNotification('⚠ No hay registros'); return; }
-  showNotification('⏳ Generando PDF, esto puede tardar...');
+  
+  const overlay = document.getElementById('syncOverlay');
+  const syncText = document.getElementById('syncText');
+  overlay.style.display = 'flex';
+  syncText.textContent = 'Generando PDF (Puede tardar)...';
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -900,7 +905,6 @@ async function generatePDF() {
     if (i > 0) doc.addPage();
     let y = 10;
 
-    // --- ENCABEZADO NEGRO Y LOGO ---
     doc.setFillColor(17, 17, 17);
     doc.rect(10, y, 190, 25, 'F');
     doc.setFillColor(0, 180, 216);
@@ -932,7 +936,6 @@ async function generatePDF() {
 
     y += 35;
 
-    // --- BARRA DEL ELEMENTO ---
     doc.setFillColor(210, 240, 250);
     doc.rect(10, y, 190, 10, 'F');
     doc.setTextColor(0, 100, 150);
@@ -941,7 +944,6 @@ async function generatePDF() {
     doc.text(`${r.type} ${r.name}`, 12, y + 7);
     y += 18;
 
-    // --- UBICACION Y MAPA ---
     doc.setTextColor(50, 50, 50);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
@@ -963,8 +965,6 @@ async function generatePDF() {
           doc.setFont('helvetica', 'normal');
           doc.text("Abrir en Google Maps", 105, y + 30, {align: "center"});
        }
-       
-       doc.link(45, y, 120, 60, { url: `https://www.google.com/maps/search/?api=1&query=${r.lat},${r.lng}` });
        y += 65;
     } else {
        doc.setFont('helvetica', 'bold');
@@ -972,7 +972,6 @@ async function generatePDF() {
        y += 15;
     }
 
-    // --- FOTOS DEL ELEMENTO ---
     for (let j = 0; j < r.photos.length; j++) {
       const p = r.photos[j];
 
@@ -1002,16 +1001,46 @@ async function generatePDF() {
 
         doc.addImage(p.dataUrl, 'JPEG', imgX, y, imgW, imgH);
         y += imgH + 10;
-      } catch(e) {
-        doc.text("Error cargando foto", 15, y + 10);
-        y += 20;
-      }
+      } catch(e) {}
     }
   }
   
-  doc.save('Registro_Inspeccion.pdf');
-  showNotification('✅ PDF generado exitosamente');
-  document.getElementById('notification').style.display = 'none';
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  const fechaStr = `${dd}-${mm}-${yyyy}`;
+
+  let cleanProj = currentProjectName.replace(/^\d{4}-\d{2}-\d{2} - /, ''); 
+  const pdfFileName = `${currentContractor} - ${fechaStr} - ${cleanProj}.pdf`;
+
+  doc.save(pdfFileName);
+
+  syncText.textContent = 'Subiendo PDF a Google Drive...';
+  const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+  const payload = {
+    isPdfUpload: true, 
+    contractorName: currentContractor || "General",
+    projectName: currentProjectName || "Sin_Proyecto",
+    fileName: pdfFileName,
+    base64Data: pdfBase64,
+    mimeType: 'application/pdf'
+  };
+
+  try {
+    let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+    let result = await response.json();
+    if(result.status === 'success') {
+      showNotification('✅ PDF guardado en el telefono y en Drive');
+    } else {
+      showNotification('⚠ PDF descargado, pero fallo la subida a Drive');
+    }
+  } catch(e) {
+    showNotification('⚠ PDF descargado, pero sin conexion a Drive');
+  }
+
+  overlay.style.display = 'none';
 }
 
 async function downloadPhotos() {
