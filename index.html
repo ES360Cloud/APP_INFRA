@@ -45,11 +45,12 @@
     
     .form-group { margin-bottom: 16px; }
     .form-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; display: block; }
-    .form-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 14px; font-family: 'Roboto', sans-serif; outline: none; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray2); border-radius: 8px; font-size: 14px; font-family: 'Roboto', sans-serif; outline: none; background: #fff;}
     .form-input:focus { border-color: var(--cyan); }
     
     .btn { padding: 11px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; transition: all 0.2s; text-align: center; display: inline-flex; justify-content: center; align-items: center; gap: 8px; }
     .btn-primary { background: var(--cyan); color: var(--white); }
+    .btn-primary:disabled { background: #a0dbe6; cursor: not-allowed; }
     .btn-secondary { background: var(--gray); color: var(--text); border: 1.5px solid var(--gray2); }
     .btn-danger { background: #fee; color: #c00; border: 1.5px solid #fcc; font-size: 12px; padding: 6px 12px; }
     .btn-edit { background: var(--cyan-light); color: var(--cyan-dark); border: 1.5px solid var(--cyan); font-size: 12px; padding: 6px 12px; margin-right: 6px;}
@@ -101,39 +102,56 @@
     <div class="header-text">
       <div class="title-row">
         <h1>eSoluciones 360</h1>
-        <span class="version-badge">v4.2</span>
+        <span class="version-badge">v5.0 LOGIN</span>
       </div>
-      <p id="headerProjectName">Registro de Inspeccion</p>
+      <p id="headerProjectName">Acceso Contratista</p>
     </div>
   </div>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
 
   <div class="screen active" id="screen0">
-    <div class="screen-title">Inicio de Sesion y Proyecto</div>
-    <div class="screen-sub">Identifique a su empresa y el proyecto a trabajar</div>
+    <div class="screen-title">Acceso de Contrata</div>
+    <div class="screen-sub">Ingrese sus credenciales de acceso asignadas</div>
     
     <div class="form-group">
-      <label class="form-label">Nombre de Contrata / Empresa</label>
-      <input class="form-input" id="contractorInput" type="text" placeholder="EMPRESA CONTRATISTA ASIGNADA" style="text-transform: uppercase;" />
+      <label class="form-label">CONTRATISTA</label>
+      <input class="form-input" id="loginUserInput" type="text" placeholder="Escriba su nombre de contrata" style="text-transform: uppercase;" />
     </div>
 
     <div class="form-group">
-      <label class="form-label">Nombre del Proyecto / Ciudad</label>
-      <input class="form-input" id="projectNameInput" type="text" placeholder="Ej: ALORA" />
+      <label class="form-label">CONTRASEÑA</label>
+      <input class="form-input" id="loginPassInput" type="password" placeholder="Escriba su contraseña" />
     </div>
     
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="startProject()" style="width:100%">Comenzar →</button>
+      <button class="btn btn-primary" id="btnLogin" onclick="attemptLogin()" style="width:100%">Verificar y Entrar</button>
     </div>
+    
     <div id="savedProjectsInfo" style="margin-top: 20px; font-size: 12px; color: var(--text2); text-align: center; display: none;">
       Recuperando registros guardados localmente...
     </div>
     <div class="btn-row" id="continueSavedBtnRow" style="display:none;">
-       <button class="btn btn-secondary" onclick="goScreen(3)" style="width:100%">Ver registros pendientes</button>
+       <button class="btn btn-secondary" onclick="goScreen(4)" style="width:100%">Ver registros pendientes</button>
     </div>
   </div>
 
   <div class="screen" id="screen1">
+    <div class="screen-title">Proyectos Asignados</div>
+    <div class="screen-sub">Seleccione el proyecto donde va a trabajar hoy</div>
+    
+    <div class="form-group">
+      <label class="form-label">PROYECTO A INSPECCIONAR</label>
+      <select class="form-input" id="projectSelect" style="appearance: auto;">
+        <option value="" disabled selected>-- Seleccione un proyecto --</option>
+      </select>
+    </div>
+    
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="startProject()" style="width:100%">Comenzar Inspeccion →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen2">
     <div class="screen-title">Tipo de elemento</div>
     
     <div class="section-separator">
@@ -171,13 +189,13 @@
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goScreen(0)">← Proyecto</button>
-      <button class="btn btn-primary" onclick="goStep2()" id="btnStep1" disabled>Continuar →</button>
+      <button class="btn btn-secondary" onclick="goScreen(1)">← Proyectos</button>
+      <button class="btn btn-primary" onclick="goStep3()" id="btnStep2" disabled>Continuar →</button>
     </div>
   </div>
 
-  <div class="screen" id="screen2">
-    <div class="screen-title" id="screen2Title">Datos</div>
+  <div class="screen" id="screen3">
+    <div class="screen-title" id="screen3Title">Datos</div>
     
     <div class="gps-status" id="gpsStatus">
       <div class="gps-dot" id="gpsDot"></div>
@@ -207,7 +225,7 @@
     
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="goPreviousElement()">← Atras</button>
-      <button class="btn btn-green" id="btnSaveAdd" onclick="saveAndAddAnother()" style="flex: 2;">➕ Guardar y Agregar otro</button>
+      <button class="btn btn-green" id="btnSaveAdd" onclick="saveAndAddAnother()" style="flex: 2;">➕ Agregar otro</button>
       <button class="btn btn-primary" id="btnSaveSummary" onclick="saveAndGoSummary()">Ver resumen →</button>
       <button class="btn btn-blue" id="btnUpdateEdit" onclick="updateEdit()" style="display:none; flex: 2; width: 100%;">💾 Guardar Edicion</button>
     </div>
@@ -216,11 +234,11 @@
     </div>
   </div>
 
-  <div class="screen" id="screen3">
+  <div class="screen" id="screen4">
     <div class="screen-title">Resumen y Sincronizacion</div>
     <div id="summaryContainer"></div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goBackToScreen2()">← Agregar mas fotos</button>
+      <button class="btn btn-secondary" onclick="goBackToScreen3()">← Agregar mas fotos</button>
       <button class="btn btn-blue" onclick="syncWithDrive()" style="width:100%; font-size: 16px; padding: 14px;">☁️ Sincronizar fallidos con Drive</button>
       <button class="btn btn-primary" onclick="generatePDF()">📄 Descargar y Subir PDF</button>
       <button class="btn btn-green" onclick="downloadPhotos()">⬇ ZIP Fotos y Mapa</button>
@@ -232,18 +250,18 @@
 <div class="notification" id="notification"></div>
 <div class="sync-overlay" id="syncOverlay">
   <div class="spinner"></div>
-  <h2 id="syncText">Sincronizando...</h2>
-  <p id="syncSubtext">No cierres esta pantalla ni la aplicacion.</p>
+  <h2 id="syncText">Procesando...</h2>
+  <p id="syncSubtext">Por favor espere unos segundos.</p>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-// URL SCRIPT ACTUALIZADA
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzipnUpTqNIpdPJ_gXTMQinWm9qJdcQP4VURhOtnVxYKzWzzThAh_F_ft9zmiBsIDLk/exec";
+// ---------- AQUI PON LA URL DE LA NUEVA IMPLEMENTACION DEL SCRIPT ----------
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYv0fHuvqnmEapbwRO2oD1JefOysp48EVGwut4aVZiKWd5Ay4ZYhUoAC9w9u-NwBKx/exec";
+// ---------------------------------------------------------------------------
 
-// ---------- LOGICA DE ETIQUETAS ACTUALIZADA ----------
 const PHOTO_OPTIONS = {
   'ARQUETA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','RECORRIDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
   'CAMARA': ['PANORAMICA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','ENTRADA CR','PRISMA INTERIOR DERECHO','PRISMA INTERIOR IZQUIERDO','RECORRIDO','ETIQUETA 1','ETIQUETA 2','OTRO'],
@@ -253,7 +271,6 @@ const PHOTO_OPTIONS = {
   'CTO': ['ABIERTA 1','ABIERTA 2','ABIERTA 3','FUSIONES','CERRADA','PANORAMICA','ETIQUETA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','FOTO POTENCIA','OTROS'],
   'MINICAU': ['ABIERTA 1','ABIERTA 2','ABIERTA 3','FUSIONES 1','FUSIONES 2','FUSIONES 3','FUSIONES 4','CERRADA','PANORAMICA','ETIQUETA','CROQUIS EXTERIOR DERECHO','CROQUIS EXTERIOR IZQUIERDO','OTROS']
 };
-// -------------------------------------------------------
 
 const PREFIX_MAP = {
   'ARQUETA': 'ARQ',
@@ -276,23 +293,92 @@ let currentLng = "SIN COORDENADAS";
 
 let editingRecordIndex = -1;
 
+// --- INICIO DE FLUJO ---
 document.addEventListener("DOMContentLoaded", () => {
   const savedContractor = localStorage.getItem("esoluciones_contractor");
   if (savedContractor) {
-    document.getElementById("contractorInput").value = savedContractor;
+    document.getElementById("loginUserInput").value = savedContractor;
   }
 });
 
+async function attemptLogin() {
+  const user = document.getElementById('loginUserInput').value.trim().toUpperCase();
+  const pass = document.getElementById('loginPassInput').value.trim();
+  
+  if(!user || !pass) {
+    showNotification("⚠ Ingrese Contratista y Contraseña");
+    return;
+  }
+
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.textContent = "Verificando...";
+  
+  const overlay = document.getElementById('syncOverlay');
+  document.getElementById('syncText').textContent = "Verificando credenciales...";
+  document.getElementById('syncSubtext').textContent = "Conectando con la base de datos";
+  overlay.style.display = 'flex';
+
+  try {
+    const url = `${GOOGLE_SCRIPT_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.status === 'success') {
+      currentContractor = user;
+      localStorage.setItem("esoluciones_contractor", currentContractor);
+      
+      const select = document.getElementById('projectSelect');
+      select.innerHTML = '<option value="" disabled selected>-- Seleccione un proyecto --</option>';
+      data.projects.forEach(proj => {
+        select.innerHTML += `<option value="${proj}">${proj}</option>`;
+      });
+      
+      document.getElementById('headerProjectName').textContent = currentContractor;
+      goScreen(1);
+    } else {
+      showNotification("❌ " + data.message);
+    }
+  } catch (error) {
+    showNotification("⚠ Error de conexión. Revisa el internet.");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "Verificar y Entrar";
+  overlay.style.display = 'none';
+}
+
+function startProject() {
+  const select = document.getElementById('projectSelect');
+  const projName = select.value;
+  
+  if(!projName) { 
+    showNotification("⚠ Seleccione un proyecto de la lista"); 
+    return; 
+  }
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = ("0" + (today.getMonth() + 1)).slice(-2);
+  const dd = ("0" + today.getDate()).slice(-2);
+  const dateString = yyyy + "-" + mm + "-" + dd;
+  
+  // Combina la fecha con el nombre del proyecto como antes
+  currentProjectName = dateString + " - " + projName;
+  document.getElementById('headerProjectName').textContent = currentContractor + " | " + currentProjectName;
+  
+  goScreen(2);
+}
+
+// --- DB LOCAL ---
 let db;
 const request = indexedDB.open("InfraDB", 4); 
-
 request.onupgradeneeded = function(e) {
   db = e.target.result;
   if (!db.objectStoreNames.contains('records')) {
     db.createObjectStore('records', { keyPath: 'id', autoIncrement: true });
   }
 };
-
 request.onsuccess = function(e) {
   db = e.target.result;
   loadRecordsFromDB(); 
@@ -302,23 +388,20 @@ function loadRecordsFromDB() {
   const tx = db.transaction('records', 'readonly');
   const store = tx.objectStore('records');
   const getAll = store.getAll();
-  
   getAll.onsuccess = function() {
     allRecords = getAll.result;
     if(allRecords.length > 0) {
       document.getElementById('savedProjectsInfo').style.display = 'block';
       document.getElementById('continueSavedBtnRow').style.display = 'flex';
-      
       const pendingCount = allRecords.filter(r => !r.synced).length;
-      document.getElementById('savedProjectsInfo').textContent = `Tienes ${allRecords.length} elementos locales (${pendingCount} pendientes de sincronizar).`;
+      document.getElementById('savedProjectsInfo').textContent = `Tienes ${allRecords.length} elementos locales (${pendingCount} pendientes).`;
       
-      if(!document.getElementById('projectNameInput').value) {
-        let savedName = allRecords[0].projectName || "";
-        savedName = savedName.replace(/^\d{4}-\d{2}-\d{2} - /, '');
-        document.getElementById('projectNameInput').value = savedName;
+      if(allRecords[0].contractorName) {
+         currentContractor = allRecords[0].contractorName;
+         document.getElementById('loginUserInput').value = currentContractor;
       }
-      if(!document.getElementById('contractorInput').value && allRecords[0].contractorName) {
-        document.getElementById('contractorInput').value = allRecords[0].contractorName;
+      if(allRecords[0].projectName) {
+         currentProjectName = allRecords[0].projectName;
       }
     }
   };
@@ -359,147 +442,92 @@ function clearAllDB() {
   allRecords = [];
 }
 
-function startProject() {
-  let contractor = document.getElementById('contractorInput').value.trim().toUpperCase();
-  let name = document.getElementById('projectNameInput').value.trim();
-  
-  if(!contractor) { showNotification("⚠ Introduce la empresa/contrata"); return; }
-  if(!name) { showNotification("⚠ Introduce un nombre de proyecto"); return; }
-
-  localStorage.setItem("esoluciones_contractor", contractor);
-  currentContractor = contractor;
-
-  if (!name.match(/^\d{4}-\d{2}-\d{2} - /)) {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = ("0" + (today.getMonth() + 1)).slice(-2);
-    const dd = ("0" + today.getDate()).slice(-2);
-    const dateString = yyyy + "-" + mm + "-" + dd;
-    name = dateString + " - " + name;
-  }
-
-  currentProjectName = name;
-  document.getElementById('headerProjectName').textContent = currentContractor + " | " + currentProjectName;
-  document.getElementById('projectNameInput').value = currentProjectName;
-  
-  goScreen(1);
-}
-
+// --- LOGICA DE PANTALLAS Y FOTOS ---
 function selectInfra(type) {
   selectedInfra = type;
   document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected'));
   const el = document.getElementById('card_' + (type.includes('SALIDAS') ? 'SALIDAS' : type.includes('PASOS') ? 'PASOS' : type));
   if (el) el.classList.add('selected');
-  document.getElementById('btnStep1').disabled = false;
+  document.getElementById('btnStep2').disabled = false;
 }
 
 function requestGPS() {
   const dot = document.getElementById('gpsDot');
   const text = document.getElementById('gpsText');
-  
-  currentLat = "SIN COORDENADAS";
-  currentLng = "SIN COORDENADAS";
-  
-  dot.className = 'gps-dot';
-  text.textContent = 'Buscando ubicacion GPS...';
+  currentLat = "SIN COORDENADAS"; currentLng = "SIN COORDENADAS";
+  dot.className = 'gps-dot'; text.textContent = 'Buscando ubicacion GPS...';
 
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        currentLat = position.coords.latitude.toFixed(6);
-        currentLng = position.coords.longitude.toFixed(6);
-        dot.className = 'gps-dot active';
-        text.textContent = `GPS Activo (${currentLat}, ${currentLng})`;
+        currentLat = position.coords.latitude.toFixed(6); currentLng = position.coords.longitude.toFixed(6);
+        dot.className = 'gps-dot active'; text.textContent = `GPS Activo (${currentLat}, ${currentLng})`;
       },
       (error) => {
-        dot.className = 'gps-dot error';
-        text.textContent = 'GPS no disponible (Se guardara sin coordenadas)';
-        alert("⚠️ GPS inactivo o permiso denegado. Recuerda activar la ubicacion para el registro. El elemento se guardara sin coordenadas.");
+        dot.className = 'gps-dot error'; text.textContent = 'GPS no disponible';
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   } else {
-    dot.className = 'gps-dot error';
-    text.textContent = 'Tu navegador no soporta GPS';
-    alert("⚠️ Tu navegador no soporta GPS. El elemento se guardara sin coordenadas.");
+    dot.className = 'gps-dot error'; text.textContent = 'Tu navegador no soporta GPS';
   }
 }
 
-function resetScreen2Buttons() {
+function resetScreen3Buttons() {
   document.getElementById('btnSaveAdd').style.display = 'inline-flex';
   document.getElementById('btnSaveSummary').style.display = 'inline-flex';
   document.getElementById('btnUpdateEdit').style.display = 'none';
 }
 
-function goStep2() {
+function goStep3() {
   editingRecordIndex = -1;
-  resetScreen2Buttons();
+  resetScreen3Buttons();
   currentPhotos = [];
-  
   const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
   const count = allRecords.filter(r => r.type === selectedInfra).length + 1;
   document.getElementById('infraName').value = prefix + ' ' + count;
-
-  document.getElementById('screen2Title').textContent = selectedInfra;
+  document.getElementById('screen3Title').textContent = selectedInfra;
   populateOptions();
   renderPhotos();
   requestGPS(); 
-  goScreen(2);
+  goScreen(3);
 }
 
-function goBackToScreen2() {
-  if (!selectedInfra) {
-    goScreen(1);
-    return;
-  }
+function goBackToScreen3() {
+  if (!selectedInfra) { goScreen(2); return; }
   editingRecordIndex = -1;
-  resetScreen2Buttons();
+  resetScreen3Buttons();
   currentPhotos = [];
-  
   const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
   const count = allRecords.filter(r => r.type === selectedInfra).length + 1;
   document.getElementById('infraName').value = prefix + ' ' + count;
-  
   renderPhotos();
   requestGPS(); 
-  goScreen(2);
+  goScreen(3);
 }
 
 function goToInfraSelection() {
   editingRecordIndex = -1;
-  resetScreen2Buttons();
-  goScreen(1);
+  resetScreen3Buttons();
+  goScreen(2);
 }
 
 function goPreviousElement() {
   const sameTypeRecords = allRecords.filter(r => r.type === selectedInfra);
-  
-  if (sameTypeRecords.length === 0) {
-     showNotification("No hay elementos anteriores de este tipo.");
-     return;
-  }
-
+  if (sameTypeRecords.length === 0) { showNotification("No hay elementos anteriores."); return; }
   let targetRecord = null;
   let targetIndexInAll = -1;
-
   if (editingRecordIndex !== -1) {
     const rec = allRecords[editingRecordIndex];
     const currentIndex = sameTypeRecords.findIndex(r => r === rec);
-    if (currentIndex > 0) {
-      targetRecord = sameTypeRecords[currentIndex - 1];
-    } else {
-      showNotification("Este es el primer elemento. No hay anterior.");
-      return;
-    }
+    if (currentIndex > 0) targetRecord = sameTypeRecords[currentIndex - 1];
+    else { showNotification("Este es el primer elemento."); return; }
   } else {
     targetRecord = sameTypeRecords[sameTypeRecords.length - 1];
   }
-
   if (targetRecord) {
     targetIndexInAll = allRecords.indexOf(targetRecord);
-    if (targetIndexInAll !== -1) {
-      editRecord(targetIndexInAll);
-    }
+    if (targetIndexInAll !== -1) editRecord(targetIndexInAll);
   }
 }
 
@@ -519,31 +547,18 @@ function resizeImage(file, callback) {
   reader.onload = function(e) {
     const img = new Image();
     img.onload = function() {
-      const MAX_WIDTH = 1200;
-      const MAX_HEIGHT = 1200;
-      let width = img.width;
-      let height = img.height;
-
+      const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
+      let width = img.width; let height = img.height;
       if (width > height) {
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width;
-          width = MAX_WIDTH;
-        }
+        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
       } else {
-        if (height > MAX_HEIGHT) {
-          width *= MAX_HEIGHT / height;
-          height = MAX_HEIGHT;
-        }
+        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
       }
-
       const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-      callback(dataUrl);
+      callback(canvas.toDataURL('image/jpeg', 0.8));
     };
     img.src = e.target.result;
   };
@@ -555,16 +570,9 @@ function addPhoto(input) {
   if (!file) return;
   const val = document.getElementById('photoNameSelect').value;
   const name = (val === 'OTRO' || val === 'OTROS') ? document.getElementById('otroInput').value : val;
-  
   showNotification('⏳ Optimizando foto...');
-  
   resizeImage(file, function(dataUrl) {
-    currentPhotos.push({ 
-      name: name || 'Foto', 
-      dataUrl: dataUrl, 
-      fileName: file.name,
-      mimeType: 'image/jpeg'
-    });
+    currentPhotos.push({ name: name || 'Foto', dataUrl: dataUrl, fileName: file.name, mimeType: 'image/jpeg' });
     renderPhotos();
     input.value = '';
     document.getElementById('notification').style.display = 'none';
@@ -581,21 +589,12 @@ function renderPhotos() {
 }
 
 function createRecordObject() {
-  return { 
-    contractorName: currentContractor,
-    projectName: currentProjectName, 
-    type: selectedInfra, 
-    name: document.getElementById('infraName').value.trim(), 
-    lat: currentLat,
-    lng: currentLng,
-    photos: [...currentPhotos],
-    synced: false
-  };
+  return { contractorName: currentContractor, projectName: currentProjectName, type: selectedInfra, name: document.getElementById('infraName').value.trim(), lat: currentLat, lng: currentLng, photos: [...currentPhotos], synced: false };
 }
 
 function validateCurrentRecord() {
   const name = document.getElementById('infraName').value.trim();
-  if (!name) { showNotification('⚠ Falta el nombre del elemento'); return false; }
+  if (!name) { showNotification('⚠ Falta nombre del elemento'); return false; }
   if (currentPhotos.length === 0) { showNotification('⚠ Faltan fotos'); return false; }
   return true;
 }
@@ -603,148 +602,76 @@ function validateCurrentRecord() {
 async function autoSyncSingleRecord(record) {
   showNotification(`⏳ Subiendo fotos de ${record.name} en segundo plano...`);
   let hasErrors = false;
-
   for (let i = 0; i < record.photos.length; i++) {
     let photo = record.photos[i];
     let base64Data = photo.dataUrl.split(',')[1];
     let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
-    
-    let payload = {
-      contractorName: record.contractorName || "General",
-      projectName: record.projectName || "Sin_Proyecto",
-      infraType: record.type,
-      infraName: record.name,
-      photoName: cleanPhotoName + ".jpg",
-      base64Data: base64Data,
-      mimeType: photo.mimeType || 'image/jpeg',
-      lat: record.lat,
-      lng: record.lng,
-      isFirstPhoto: (i === 0)
-    };
-
+    let payload = { contractorName: record.contractorName, projectName: record.projectName, infraType: record.type, infraName: record.name, photoName: cleanPhotoName + ".jpg", base64Data: base64Data, mimeType: photo.mimeType, lat: record.lat, lng: record.lng, isFirstPhoto: (i === 0) };
     try {
       let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
       let result = await response.json();
       if(result.status !== 'success') hasErrors = true;
-    } catch(e) {
-      hasErrors = true;
-    }
+    } catch(e) { hasErrors = true; }
   }
-
   if (!hasErrors) {
-    record.synced = true;
-    updateRecordInDB(record);
-    showNotification(`✅ Elemento ${record.name} subido a Google Drive.`);
+    record.synced = true; updateRecordInDB(record); showNotification(`✅ Elemento ${record.name} subido.`);
   } else {
-    showNotification(`⚠ Fallo de conexion en ${record.name}. Se guardo localmente, sincronice al final.`);
+    showNotification(`⚠ Fallo de conexion en ${record.name}. Guardado localmente.`);
   }
-  
-  if(document.getElementById('screen3').classList.contains('active')) {
-    renderSummary();
-  }
+  if(document.getElementById('screen4').classList.contains('active')) renderSummary();
 }
 
 function saveAndAddAnother() {
   if (!validateCurrentRecord()) return;
-  
-  const rec = createRecordObject();
-  
-  saveRecordToDB(rec, (savedRec) => {
+  saveRecordToDB(createRecordObject(), (savedRec) => {
     autoSyncSingleRecord(savedRec); 
-    
     currentPhotos = [];
     const prefix = PREFIX_MAP[selectedInfra] || 'ELEM';
-    const count = allRecords.filter(r => r.type === selectedInfra).length + 1;
-    document.getElementById('infraName').value = prefix + ' ' + count;
-    
-    renderPhotos();
-    requestGPS(); 
-    window.scrollTo(0, 0);
+    document.getElementById('infraName').value = prefix + ' ' + (allRecords.filter(r => r.type === selectedInfra).length + 1);
+    renderPhotos(); requestGPS(); window.scrollTo(0, 0);
   });
 }
 
 function saveAndGoSummary() {
   if (currentPhotos.length > 0) {
     if (!validateCurrentRecord()) return; 
-    const rec = createRecordObject();
-    saveRecordToDB(rec, (savedRec) => {
+    saveRecordToDB(createRecordObject(), (savedRec) => {
       autoSyncSingleRecord(savedRec);
-      currentPhotos = [];
-      document.getElementById('infraName').value = '';
-      renderSummary();
-      goScreen(3);
+      currentPhotos = []; document.getElementById('infraName').value = ''; renderSummary(); goScreen(4);
     });
   } else {
-    currentPhotos = [];
-    document.getElementById('infraName').value = '';
-    renderSummary();
-    goScreen(3);
+    currentPhotos = []; document.getElementById('infraName').value = ''; renderSummary(); goScreen(4);
   }
 }
 
 function editRecord(index) {
-  editingRecordIndex = index;
-  const rec = allRecords[index];
-  
-  selectedInfra = rec.type;
-  currentPhotos = [...rec.photos]; 
-  document.getElementById('infraName').value = rec.name;
-  document.getElementById('screen2Title').textContent = "Editando: " + rec.type;
-
-  populateOptions();
-  renderPhotos();
-
-  currentLat = rec.lat;
-  currentLng = rec.lng;
-  const dot = document.getElementById('gpsDot');
-  const text = document.getElementById('gpsText');
-  dot.className = 'gps-dot active';
-  text.textContent = `GPS Guardado (${currentLat}, ${currentLng})`;
-
-  document.getElementById('btnSaveAdd').style.display = 'none';
-  document.getElementById('btnSaveSummary').style.display = 'none';
-  document.getElementById('btnUpdateEdit').style.display = 'inline-flex';
-
-  goScreen(2);
+  editingRecordIndex = index; const rec = allRecords[index];
+  selectedInfra = rec.type; currentPhotos = [...rec.photos]; 
+  document.getElementById('infraName').value = rec.name; document.getElementById('screen3Title').textContent = "Editando: " + rec.type;
+  populateOptions(); renderPhotos();
+  currentLat = rec.lat; currentLng = rec.lng;
+  const dot = document.getElementById('gpsDot'); const text = document.getElementById('gpsText');
+  dot.className = 'gps-dot active'; text.textContent = `GPS Guardado (${currentLat}, ${currentLng})`;
+  document.getElementById('btnSaveAdd').style.display = 'none'; document.getElementById('btnSaveSummary').style.display = 'none'; document.getElementById('btnUpdateEdit').style.display = 'inline-flex';
+  goScreen(3);
 }
 
 function updateEdit() {
   if (!validateCurrentRecord()) return;
-
   const rec = allRecords[editingRecordIndex];
-  rec.name = document.getElementById('infraName').value.trim();
-  rec.photos = [...currentPhotos];
-  rec.synced = false; 
-
+  rec.name = document.getElementById('infraName').value.trim(); rec.photos = [...currentPhotos]; rec.synced = false; 
   updateRecordInDB(rec);
-  
-  editingRecordIndex = -1;
-  resetScreen2Buttons();
-  
-  autoSyncSingleRecord(rec);
-
-  renderSummary();
-  goScreen(3);
+  editingRecordIndex = -1; resetScreen3Buttons(); autoSyncSingleRecord(rec); renderSummary(); goScreen(4);
 }
 
 function renderSummary() {
   const cont = document.getElementById('summaryContainer');
-  if(allRecords.length === 0) {
-    cont.innerHTML = "<div style='text-align:center; padding: 20px; color: #666;'>No hay registros guardados.</div>";
-    return;
-  }
-  
+  if(allRecords.length === 0) { cont.innerHTML = "<div style='text-align:center; padding: 20px; color: #666;'>No hay registros guardados.</div>"; return; }
   cont.innerHTML = allRecords.map((r, i) => `
     <div class="summary-section">
       <div class="summary-header">
-        <span>
-          ${r.type}: ${r.name} 
-          <span class="sync-badge ${r.synced ? 'done' : 'pending'}">${r.synced ? '☁️ OK' : '⏳ PENDIENTE'}</span>
-        </span>
-        <div>
-          <button class="btn-edit" onclick="editRecord(${i})">✏️</button>
-          <button class="btn-danger" style="padding:4px 8px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;" onclick="deleteRecordFromDB(${i})">✕</button>
-        </div>
+        <span>${r.type}: ${r.name} <span class="sync-badge ${r.synced ? 'done' : 'pending'}">${r.synced ? '☁️ OK' : '⏳ PEND'}</span></span>
+        <div><button class="btn-edit" onclick="editRecord(${i})">✏️</button><button class="btn-danger" style="padding:4px 8px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;" onclick="deleteRecordFromDB(${i})">✕</button></div>
       </div>
       <div style="padding: 5px 14px; font-size: 11px; color: var(--text2); background: var(--gray);">GPS: ${r.lat}, ${r.lng}</div>
       <div class="summary-body">${r.photos.map(p => `<div class="summary-photo-row"><img class="summary-thumb" src="${p.dataUrl}"><span>${p.name}</span></div>`).join('')}</div>
@@ -752,314 +679,115 @@ function renderSummary() {
 }
 
 function goScreen(n) {
-  if (n === 3) renderSummary();
+  if (n === 4) renderSummary();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen' + n).classList.add('active');
-  document.getElementById('progressFill').style.width = ((n+1) * 25) + '%';
+  document.getElementById('progressFill').style.width = ((n+1) * 20) + '%';
   window.scrollTo(0, 0);
 }
 
 function showNotification(m) {
-  const n = document.getElementById('notification');
-  n.textContent = m; n.style.display = 'block';
-  setTimeout(() => n.style.display = 'none', 4000);
+  const n = document.getElementById('notification'); n.textContent = m; n.style.display = 'block'; setTimeout(() => n.style.display = 'none', 4000);
 }
 
 async function confirmReset() {
-  if(confirm("¿Has generado y subido el PDF final a Drive? Si no lo has hecho, dale a Cancelar, genera el PDF y luego vuelve aqui.")) {
-    if(confirm("ATENCION: Esto borrara permanentemente la memoria local de este telefono. ¿Seguro que deseas empezar una Nueva Inspeccion?")) {
-      clearAllDB();
-      goScreen(0);
-      document.getElementById('btnStep1').disabled = true;
-      document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected'));
-      document.getElementById('projectNameInput').value = '';
-      document.getElementById('savedProjectsInfo').style.display = 'none';
-      document.getElementById('continueSavedBtnRow').style.display = 'none';
-      showNotification("Memoria limpiada con exito");
+  if(confirm("¿Has generado y subido el PDF final a Drive?")) {
+    if(confirm("ATENCION: Esto borrara permanentemente la memoria local. ¿Empezar Nueva Inspeccion?")) {
+      clearAllDB(); goScreen(0); document.getElementById('loginPassInput').value = ''; document.getElementById('btnStep2').disabled = true; document.querySelectorAll('.infra-card').forEach(c => c.classList.remove('selected')); document.getElementById('savedProjectsInfo').style.display = 'none'; document.getElementById('continueSavedBtnRow').style.display = 'none'; showNotification("Memoria limpiada");
     }
   }
 }
 
 async function syncWithDrive() {
   const pendingRecords = allRecords.filter(r => !r.synced);
-  
-  if(pendingRecords.length === 0) {
-    showNotification('✅ Todos los registros ya estan en Drive');
-    return;
-  }
-
-  const overlay = document.getElementById('syncOverlay');
-  const syncText = document.getElementById('syncText');
-  overlay.style.display = 'flex';
-
-  let totalPhotos = 0;
-  pendingRecords.forEach(r => totalPhotos += r.photos.length);
-
-  let syncedPhotos = 0;
-  let globalErrors = false;
-
+  if(pendingRecords.length === 0) { showNotification('✅ Todos en Drive'); return; }
+  const overlay = document.getElementById('syncOverlay'); const syncText = document.getElementById('syncText');
+  document.getElementById('syncSubtext').textContent = "No cierres la aplicacion"; overlay.style.display = 'flex';
+  let totalPhotos = 0; pendingRecords.forEach(r => totalPhotos += r.photos.length);
+  let syncedPhotos = 0; let globalErrors = false;
   for (let record of pendingRecords) {
     let recordErrors = false;
-    
     for (let i = 0; i < record.photos.length; i++) {
-      let photo = record.photos[i];
-      syncText.textContent = `Enviando foto ${syncedPhotos + 1} de ${totalPhotos}...`;
-
-      let base64Data = photo.dataUrl.split(',')[1];
-      let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
-      
-      let payload = {
-        contractorName: record.contractorName || "General",
-        projectName: record.projectName || "Sin_Proyecto",
-        infraType: record.type,
-        infraName: record.name,
-        photoName: cleanPhotoName + ".jpg",
-        base64Data: base64Data,
-        mimeType: photo.mimeType || 'image/jpeg',
-        lat: record.lat,
-        lng: record.lng,
-        isFirstPhoto: (i === 0)
-      };
-
-      try {
-        let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-        let result = await response.json();
-        if(result.status !== 'success') {
-          console.error("Error servidor:", result.message);
-          recordErrors = true;
-          globalErrors = true;
-        }
-      } catch(e) {
-        console.error("Error red:", e);
-        recordErrors = true;
-        globalErrors = true;
-      }
+      let photo = record.photos[i]; syncText.textContent = `Enviando foto ${syncedPhotos + 1} de ${totalPhotos}...`;
+      let base64Data = photo.dataUrl.split(',')[1]; let cleanPhotoName = photo.name.replace(/[^a-zA-Z0-9_-]/g, "_");
+      let payload = { contractorName: record.contractorName, projectName: record.projectName, infraType: record.type, infraName: record.name, photoName: cleanPhotoName + ".jpg", base64Data: base64Data, mimeType: photo.mimeType, lat: record.lat, lng: record.lng, isFirstPhoto: (i === 0) };
+      try { let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }); let result = await response.json(); if(result.status !== 'success') { recordErrors = true; globalErrors = true; } } catch(e) { recordErrors = true; globalErrors = true; }
       syncedPhotos++;
     }
-    
-    if(!recordErrors) {
-      record.synced = true;
-      updateRecordInDB(record);
-    }
+    if(!recordErrors) { record.synced = true; updateRecordInDB(record); }
   }
-
-  overlay.style.display = 'none';
-  renderSummary(); 
-  
-  if(globalErrors) {
-    showNotification('⚠ Algunas fotos fallaron. Revisa tu conexion e intenta de nuevo.');
-  } else {
-    showNotification('✅ Sincronizacion manual completada con exito');
-  }
+  overlay.style.display = 'none'; renderSummary(); 
+  if(globalErrors) showNotification('⚠ Fallaron fotos.'); else showNotification('✅ Sincronizacion manual completa');
 }
 
 async function getImageDims(dataUrl) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => resolve({w: img.width, h: img.height});
-    img.onerror = () => resolve({w: 800, h: 600});
-    img.src = dataUrl;
-  });
+  return new Promise(resolve => { const img = new Image(); img.onload = () => resolve({w: img.width, h: img.height}); img.onerror = () => resolve({w: 800, h: 600}); img.src = dataUrl; });
 }
-
 async function getStaticMapUrl(lat, lng) {
   return new Promise((resolve) => {
-    const latF = parseFloat(lat);
-    const lngF = parseFloat(lng);
-    const box = 0.005; 
+    const latF = parseFloat(lat); const lngF = parseFloat(lng); const box = 0.005; 
     const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/export?bbox=${lngF-box},${latF-box},${lngF+box},${latF+box}&bboxSR=4326&imageSR=4326&size=500,250&format=png&f=image`;
-    
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
+    const img = new Image(); img.crossOrigin = "Anonymous";
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      
-      ctx.fillStyle = "rgba(0, 180, 216, 0.3)";
-      ctx.beginPath(); ctx.arc(250, 125, 15, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#0275d8";
-      ctx.beginPath(); ctx.arc(250, 125, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-      
+      const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+      ctx.fillStyle = "rgba(0, 180, 216, 0.3)"; ctx.beginPath(); ctx.arc(250, 125, 15, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "#0275d8"; ctx.beginPath(); ctx.arc(250, 125, 6, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
       resolve(canvas.toDataURL('image/png'));
     };
-    img.onerror = () => resolve(null);
-    img.src = url;
+    img.onerror = () => resolve(null); img.src = url;
   });
 }
 
 async function generatePDF() {
   if (!allRecords.length) { showNotification('⚠ No hay registros'); return; }
-  
-  const overlay = document.getElementById('syncOverlay');
-  const syncText = document.getElementById('syncText');
-  overlay.style.display = 'flex';
-  syncText.textContent = 'Generando PDF (Puede tardar)...';
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
+  const overlay = document.getElementById('syncOverlay'); const syncText = document.getElementById('syncText');
+  document.getElementById('syncSubtext').textContent = "Procesando imagenes y coordenadas"; overlay.style.display = 'flex'; syncText.textContent = 'Generando PDF...';
+  const { jsPDF } = window.jspdf; const doc = new jsPDF();
   for (let i = 0; i < allRecords.length; i++) {
-    const r = allRecords[i];
-    if (i > 0) doc.addPage();
-    let y = 10;
-
-    doc.setFillColor(17, 17, 17);
-    doc.rect(10, y, 190, 25, 'F');
-    doc.setFillColor(0, 180, 216);
-    doc.rect(10, y + 25, 80, 2, 'F');
-
-    doc.setFillColor(0, 180, 216);
-    doc.circle(22, y + 12.5, 6, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'bold');
-    doc.text("360", 19, y + 14);
-
-    doc.setTextColor(0, 180, 216);
-    doc.setFontSize(14);
-    doc.text("eSoluciones 360", 35, y + 12);
-
-    doc.setTextColor(170, 170, 170);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    let projText = `${r.contractorName} | ${r.projectName}`.toUpperCase();
-    doc.text(projText, 35, y + 18);
-
-    doc.setDrawColor(100, 100, 100);
-    doc.setFillColor(50, 50, 50);
-    doc.roundedRect(140, y + 8, 55, 8, 3, 3, 'FD');
-    doc.setTextColor(200, 200, 200);
-    doc.setFontSize(7);
-    doc.text("E360 APP Infra & EdR v3.1", 143, y + 13.5);
-
+    const r = allRecords[i]; if (i > 0) doc.addPage(); let y = 10;
+    doc.setFillColor(17, 17, 17); doc.rect(10, y, 190, 25, 'F'); doc.setFillColor(0, 180, 216); doc.rect(10, y + 25, 80, 2, 'F');
+    doc.setFillColor(0, 180, 216); doc.circle(22, y + 12.5, 6, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(7); doc.setFont('helvetica', 'bold'); doc.text("360", 19, y + 14);
+    doc.setTextColor(0, 180, 216); doc.setFontSize(14); doc.text("eSoluciones 360", 35, y + 12);
+    doc.setTextColor(170, 170, 170); doc.setFontSize(8); doc.setFont('helvetica', 'normal'); let projText = `${r.contractorName} | ${r.projectName}`.toUpperCase(); doc.text(projText, 35, y + 18);
+    doc.setDrawColor(100, 100, 100); doc.setFillColor(50, 50, 50); doc.roundedRect(140, y + 8, 55, 8, 3, 3, 'FD'); doc.setTextColor(200, 200, 200); doc.setFontSize(7); doc.text("E360 APP Infra v5", 143, y + 13.5);
     y += 35;
-
-    doc.setFillColor(210, 240, 250);
-    doc.rect(10, y, 190, 10, 'F');
-    doc.setTextColor(0, 100, 150);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${r.type} ${r.name}`, 12, y + 7);
-    y += 18;
-
-    doc.setTextColor(50, 50, 50);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text("Ubicacion Georreferenciada:", 10, y);
-
+    doc.setFillColor(210, 240, 250); doc.rect(10, y, 190, 10, 'F'); doc.setTextColor(0, 100, 150); doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text(`${r.type} ${r.name}`, 12, y + 7); y += 18;
+    doc.setTextColor(50, 50, 50); doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.text("Ubicacion Georreferenciada:", 10, y);
     if (r.lat !== "SIN COORDENADAS") {
-       doc.setFont('helvetica', 'bold');
-       doc.text(`Latitud: ${r.lat}`, 80, y);
-       doc.text(`Longitud: ${r.lng}`, 80, y + 5);
-       y += 10;
-
+       doc.setFont('helvetica', 'bold'); doc.text(`Latitud: ${r.lat}`, 80, y); doc.text(`Longitud: ${r.lng}`, 80, y + 5); y += 10;
        const mapImg = await getStaticMapUrl(r.lat, r.lng);
-       if(mapImg) {
-          doc.addImage(mapImg, 'PNG', 45, y, 120, 60);
-       } else {
-          doc.setFillColor(240, 240, 240);
-          doc.rect(45, y, 120, 60, 'F');
-          doc.setTextColor(100, 100, 100);
-          doc.setFont('helvetica', 'normal');
-          doc.text("Abrir en Google Maps", 105, y + 30, {align: "center"});
-       }
+       if(mapImg) doc.addImage(mapImg, 'PNG', 45, y, 120, 60); else { doc.setFillColor(240, 240, 240); doc.rect(45, y, 120, 60, 'F'); doc.setTextColor(100, 100, 100); doc.setFont('helvetica', 'normal'); doc.text("Mapa no disponible", 105, y + 30, {align: "center"}); }
        y += 65;
-    } else {
-       doc.setFont('helvetica', 'bold');
-       doc.text("SIN COORDENADAS", 80, y);
-       y += 15;
-    }
-
+    } else { doc.setFont('helvetica', 'bold'); doc.text("SIN COORDENADAS", 80, y); y += 15; }
     for (let j = 0; j < r.photos.length; j++) {
-      const p = r.photos[j];
-
-      if (y > 230) { doc.addPage(); y = 20; }
-
-      doc.setFillColor(210, 240, 250);
-      doc.rect(10, y, 190, 8, 'F');
-      doc.setFontSize(10); 
-      doc.setTextColor(0, 100, 150); 
-      doc.setFont('helvetica', 'bold');
-      doc.text(p.name.toUpperCase(), 12, y + 6);
-      y += 12;
-
+      const p = r.photos[j]; if (y > 230) { doc.addPage(); y = 20; }
+      doc.setFillColor(210, 240, 250); doc.rect(10, y, 190, 8, 'F'); doc.setFontSize(10); doc.setTextColor(0, 100, 150); doc.setFont('helvetica', 'bold'); doc.text(p.name.toUpperCase(), 12, y + 6); y += 12;
       try {
-        const dims = await getImageDims(p.dataUrl);
-        const maxW = 190;
-        const maxH = 120;
-        let imgW = maxW;
-        let imgH = (dims.h * maxW) / dims.w;
-        if (imgH > maxH) {
-            imgH = maxH;
-            imgW = (dims.w * maxH) / dims.h;
-        }
-        const imgX = 10 + (190 - imgW) / 2;
-        
+        const dims = await getImageDims(p.dataUrl); const maxW = 190; const maxH = 120; let imgW = maxW; let imgH = (dims.h * maxW) / dims.w;
+        if (imgH > maxH) { imgH = maxH; imgW = (dims.w * maxH) / dims.h; } const imgX = 10 + (190 - imgW) / 2;
         if (y + imgH > 285) { doc.addPage(); y = 20; }
-
-        doc.addImage(p.dataUrl, 'JPEG', imgX, y, imgW, imgH);
-        y += imgH + 10;
+        doc.addImage(p.dataUrl, 'JPEG', imgX, y, imgW, imgH); y += imgH + 10;
       } catch(e) {}
     }
   }
-  
-  const today = new Date();
-  const dd = String(today.getDate()).padStart(2, '0');
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const yyyy = today.getFullYear();
-  const fechaStr = `${dd}-${mm}-${yyyy}`;
-
-  let cleanProj = currentProjectName.replace(/^\d{4}-\d{2}-\d{2} - /, ''); 
-  const pdfFileName = `${currentContractor} - ${fechaStr} - ${cleanProj}.pdf`;
-
-  doc.save(pdfFileName);
-
-  syncText.textContent = 'Subiendo PDF a Google Drive...';
-  const pdfBase64 = doc.output('datauristring').split(',')[1];
-
-  const payload = {
-    isPdfUpload: true, 
-    contractorName: currentContractor || "General",
-    projectName: currentProjectName || "Sin_Proyecto",
-    fileName: pdfFileName,
-    base64Data: pdfBase64,
-    mimeType: 'application/pdf'
-  };
-
+  const today = new Date(); const dd = String(today.getDate()).padStart(2, '0'); const mm = String(today.getMonth() + 1).padStart(2, '0'); const yyyy = today.getFullYear(); const fechaStr = `${dd}-${mm}-${yyyy}`;
+  let cleanProj = currentProjectName.replace(/^\d{4}-\d{2}-\d{2} - /, ''); const pdfFileName = `${currentContractor} - ${fechaStr} - ${cleanProj}.pdf`;
+  doc.save(pdfFileName); syncText.textContent = 'Subiendo PDF a Drive...'; const pdfBase64 = doc.output('datauristring').split(',')[1];
+  const payload = { isPdfUpload: true, contractorName: currentContractor, projectName: currentProjectName, fileName: pdfFileName, base64Data: pdfBase64, mimeType: 'application/pdf' };
   try {
-    let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-    let result = await response.json();
-    if(result.status === 'success') {
-      showNotification('✅ PDF guardado en el telefono y en Drive');
-    } else {
-      showNotification('⚠ PDF descargado, pero fallo la subida a Drive');
-    }
-  } catch(e) {
-    showNotification('⚠ PDF descargado, pero sin conexion a Drive');
-  }
-
+    let response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }); let result = await response.json();
+    if(result.status === 'success') showNotification('✅ PDF guardado en Drive'); else showNotification('⚠ PDF descargado, fallo subida a Drive');
+  } catch(e) { showNotification('⚠ PDF descargado, sin conexion a Drive'); }
   overlay.style.display = 'none';
 }
 
 async function downloadPhotos() {
   if (!allRecords.length) { showNotification('⚠ No hay registros'); return; }
-  showNotification('⏳ Preparando ZIP...');
-  const zip = new JSZip();
-  
+  showNotification('⏳ Preparando ZIP...'); const zip = new JSZip();
   allRecords.forEach(r => {
-    const contractorFolder = zip.folder(r.contractorName || "Contratista");
-    const projFolder = contractorFolder.folder(r.projectName || "Proyecto");
-    const infraFolder = projFolder.folder(r.type + "_" + r.name);
-    
+    const contractorFolder = zip.folder(r.contractorName || "Contratista"); const projFolder = contractorFolder.folder(r.projectName || "Proyecto"); const infraFolder = projFolder.folder(r.type + "_" + r.name);
     r.photos.forEach(p => infraFolder.file(p.name + ".jpg", p.dataUrl.split(',')[1], {base64: true}));
   });
-  
-  const blob = await zip.generateAsync({type:"blob"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "fotos_inspeccion.zip"; a.click();
-  showNotification('✅ ZIP descargado');
+  const blob = await zip.generateAsync({type:"blob"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "fotos_inspeccion.zip"; a.click(); showNotification('✅ ZIP descargado');
 }
 </script>
 </body>
