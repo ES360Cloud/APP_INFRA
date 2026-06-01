@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>eSoluciones 360 - Registro de Infraestructura</title>
-  <link rel="icon" href="./esoluciones360.png" type="image/png">
+  <link rel="icon" href="https://i.ibb.co/bRMmTL89/esoluciones360.png" type="image/png">
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Roboto:wght@400;500&display=swap');
@@ -96,13 +96,13 @@
 <div class="app">
   <div class="header">
     <div class="logo-wrap">
-      <img src="./esoluciones360.png" alt="Logo" id="logoImg" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';"/>
+      <img src="https://i.ibb.co/bRMmTL89/esoluciones360.png" alt="Logo" id="logoImg" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block';"/>
       <svg id="logoFallback" style="display:none;width:52px;height:52px;" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#00B4D8" opacity="0.2" stroke="#00B4D8" stroke-width="2"/><text x="50" y="56" text-anchor="middle" font-size="18" font-weight="bold" fill="#00B4D8" font-family="sans-serif">360</text></svg>
     </div>
     <div class="header-text">
       <div class="title-row">
         <h1>eSoluciones 360</h1>
-        <span class="version-badge">v5.0 LOGIN</span>
+        <span class="version-badge">v5.0 FIXED</span>
       </div>
       <p id="headerProjectName">Acceso Contratista</p>
     </div>
@@ -258,8 +258,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-// ---------- AQUI PON LA URL DE LA NUEVA IMPLEMENTACION DEL SCRIPT ----------
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbze6_8WQDDiN4l69mgWFQvDMCJfERbH5u-4817lWsqxwrK81dCDYma2o_kk_Rk3A006/exec";
+// ---------- LINK OPERATIVO VINCULADO A TU EXCEL ----------
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwgdjXqe5wBckeo8nSwthcO_IZHaclim2QAUeHDpSObx--ec7aSAann_1NXZ_jHvXau/exec";
 // ---------------------------------------------------------------------------
 
 const PHOTO_OPTIONS = {
@@ -357,7 +357,6 @@ function startProject() {
     return; 
   }
 
-  // Eliminamos la lógica de la fecha y guardamos solo el nombre del proyecto
   currentProjectName = projName; 
   document.getElementById('headerProjectName').textContent = currentContractor + " | " + currentProjectName;
   
